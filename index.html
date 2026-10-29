@@ -1,0 +1,2178 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>MithilaMart — Mithila Ka Apna Online Bazaar</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- Confetti Animation Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    body {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    .snap-x-mandatory { scroll-snap-type: x mandatory; }
+    .snap-center { scroll-snap-align: center; }
+    @keyframes slideUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .animate-slide-up { animation: slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+    .animate-pulse-glow { animation: pulseGlow 1.5s infinite; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 pb-20 select-none">
+
+  <!-- TOP FLASH SALE TICKER BANNER -->
+  <div class="bg-gradient-to-r from-amber-500 via-orange-600 to-red-600 text-white text-[11px] font-bold py-1.5 px-3 flex items-center justify-between shadow-md sticky top-0 z-50">
+    <div class="flex items-center gap-1.5">
+      <span class="bg-white text-red-600 text-[9px] font-black px-1.5 py-0.2 rounded uppercase animate-bounce">Flash Sale</span>
+      <span class="tracking-tight">Extra ₹100 OFF with DIWALI100 | ₹50 OFF with RAHUL50</span>
+    </div>
+    <div class="flex items-center gap-1 text-[10px] font-mono bg-black/30 px-1.5 py-0.5 rounded">
+      <i class="fa-solid fa-stopwatch text-amber-300"></i>
+      <span id="flashSaleTimer">04h:28m:15s</span>
+    </div>
+  </div>
+
+  <!-- STICKY HEADER -->
+  <header class="bg-[#9c1261] text-white sticky top-[29px] z-40 shadow-md">
+    <div class="px-3 py-2 flex items-center justify-between gap-2">
+      <div onclick="window.switchTab('home'); window.setCategory('All');" class="flex items-center gap-1.5 cursor-pointer">
+        <div class="bg-amber-400 text-[#9c1261] w-8 h-8 rounded-lg flex items-center justify-center font-black text-lg shadow">
+          🛍️
+        </div>
+        <div>
+          <h1 class="font-black text-lg leading-tight tracking-tight text-white">MithilaMart</h1>
+          <p class="text-[9px] text-pink-200 font-medium tracking-wider -mt-0.5">SUPAUL KA APNA BAZAAR</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button onclick="window.openPincodeModal()" class="flex items-center gap-1 bg-pink-950/40 border border-pink-400/30 text-white rounded-full px-2 py-1 text-[11px]">
+          <i class="fa-solid fa-location-dot text-amber-300 text-xs"></i>
+          <span id="headerPincodeBadge" class="font-bold">Supaul 852131</span>
+          <i class="fa-solid fa-chevron-down text-[9px] text-pink-200"></i>
+        </button>
+
+        <button onclick="window.openLoginModal()" id="userAuthBtn" class="flex items-center gap-1 bg-pink-950/40 border border-pink-400/30 text-white rounded-full px-2.5 py-1 text-[11px] font-semibold">
+          <i class="fa-solid fa-user text-amber-300 text-xs"></i>
+          <span id="userAuthBadge">Profile</span>
+        </button>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button onclick="window.switchTab('wishlist')" class="relative text-white p-1" aria-label="Wishlist">
+          <i class="fa-regular fa-heart text-lg"></i>
+          <span id="wishlistCountBadge" class="hidden absolute -top-1 -right-1 bg-amber-400 text-[#9c1261] font-black text-[9px] w-4 h-4 rounded-full flex items-center justify-center">0</span>
+        </button>
+        <button onclick="window.switchTab('cart')" class="relative text-white p-1" aria-label="Cart">
+          <i class="fa-solid fa-bag-shopping text-lg"></i>
+          <span id="cartCountBadge" class="hidden absolute -top-1 -right-1 bg-amber-400 text-[#9c1261] font-black text-[9px] w-4 h-4 rounded-full flex items-center justify-center">0</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Search Input -->
+    <div class="px-3 pb-2.5">
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+        <input 
+          type="text" 
+          id="searchInput" 
+          oninput="window.handleSearch(this.value)" 
+          placeholder="Search crackers, diyas, lights, daily items in Supaul..." 
+          class="w-full bg-white text-slate-900 placeholder-slate-400 text-xs rounded-lg pl-8 pr-7 py-2 focus:outline-none focus:ring-2 focus:ring-amber-400 shadow-inner"
+        />
+        <button id="clearSearchBtn" onclick="window.clearSearch()" class="hidden absolute right-2.5 top-2 text-slate-400 text-xs">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Free Delivery Status Bar -->
+    <div class="bg-pink-900/60 border-t border-pink-400/20 px-3 py-1 flex items-center justify-between text-[11px]">
+      <span id="freeDeliveryStatusText" class="font-medium text-pink-100">Add ₹199 for FREE DELIVERY</span>
+      <span id="freeDeliveryAmountRatio" class="font-bold text-amber-300">₹0 / ₹199</span>
+    </div>
+  </header>
+
+  <!-- MAIN VIEWPORT CONTAINER -->
+  <main class="max-w-xl mx-auto px-3 pt-3 pb-8">
+
+    <!-- TAB 1: HOME CATALOG -->
+    <div id="homeTab" class="space-y-3">
+      <!-- Category Pills -->
+      <div class="flex items-center gap-1.5 overflow-x-auto scrollbar-hide py-1 text-xs font-semibold">
+        <button onclick="window.setCategory('All')" class="cat-pill px-3 py-1 rounded-full whitespace-nowrap bg-[#9c1261] text-white border border-[#9c1261]">All</button>
+        <button onclick="window.setCategory('Green Firecrackers & Sparklers')" class="cat-pill px-3 py-1 rounded-full whitespace-nowrap bg-white text-slate-700 border border-slate-200">✨ Green Sparklers</button>
+        <button onclick="window.setCategory('Traditional earthen diyas')" class="cat-pill px-3 py-1 rounded-full whitespace-nowrap bg-white text-slate-700 border border-slate-200">🪔 Mitti Diyas</button>
+        <button onclick="window.setCategory('LED diyas & Lights')" class="cat-pill px-3 py-1 rounded-full whitespace-nowrap bg-white text-slate-700 border border-slate-200">💡 LED & Lights</button>
+        <button onclick="window.setCategory('Puja & Idols')" class="cat-pill px-3 py-1 rounded-full whitespace-nowrap bg-white text-slate-700 border border-slate-200">🕉️ Idols & Puja</button>
+      </div>
+
+      <!-- AUTO-SLIDING TRENDING SECTION -->
+      <div class="bg-gradient-to-r from-amber-50 via-orange-50 to-pink-50 border border-orange-200 rounded-2xl p-3 shadow-sm relative overflow-hidden">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-1.5">
+            <span class="w-6 h-6 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs shadow-sm">
+              <i class="fa-solid fa-fire"></i>
+            </span>
+            <div>
+              <h3 class="font-black text-xs md:text-sm text-slate-900 uppercase tracking-tight">Trending Highlights</h3>
+              <p class="text-[9px] text-orange-700 font-semibold">Auto-sliding deals • Handpicked for you</p>
+            </div>
+          </div>
+          <span class="text-[10px] bg-red-600 text-white font-black px-2 py-0.5 rounded-full shadow animate-pulse-glow">LIVE SALE</span>
+        </div>
+
+        <div id="trendingSliderContainer" class="flex gap-2.5 overflow-x-auto scrollbar-hide py-1 snap-x-mandatory scroll-smooth"></div>
+      </div>
+
+      <div class="flex items-center justify-between pt-1">
+        <h3 id="currentCategoryTitle" class="font-bold text-xs md:text-sm text-slate-900">All Products</h3>
+        <span class="text-[11px] text-slate-500 font-medium">Click card for customer reviews & photos</span>
+      </div>
+
+      <!-- 2-Column Product Grid -->
+      <div id="productGrid" class="grid grid-cols-2 gap-2"></div>
+    </div>
+
+    <!-- TAB 2: CART & MULTI-STEP CHECKOUT -->
+    <div id="cartTab" class="hidden space-y-3">
+      <!-- Step 1: Cart Items Breakdown -->
+      <div id="cartItemsView" class="bg-white rounded-xl border border-slate-200 p-3 shadow-sm">
+        <div class="flex items-center justify-between border-b pb-2 mb-2">
+          <h3 class="font-bold text-sm text-slate-900">Shopping Cart (<span id="cartCountTitle">0</span>)</h3>
+          <button onclick="window.switchTab('home')" class="text-xs text-[#9c1261] font-bold">+ Add Items</button>
+        </div>
+        <div id="cartItemList" class="divide-y divide-slate-100"></div>
+
+        <!-- PROMO CODE APPLICATION BOX -->
+        <div id="promoSectionBox" class="mt-3 p-3 bg-gradient-to-r from-pink-50 to-amber-50 border border-pink-200 rounded-xl space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-extrabold text-xs text-slate-900 flex items-center gap-1.5">
+              <i class="fa-solid fa-ticket text-[#9c1261]"></i> MithilaMart Promo Coupons
+            </span>
+            <span class="text-[9px] font-bold text-amber-700 bg-amber-200/60 px-1.5 py-0.5 rounded">Diwali Special</span>
+          </div>
+
+          <!-- Promo Input Form -->
+          <div class="flex gap-1.5">
+            <input 
+              type="text" 
+              id="promoInputCode" 
+              placeholder="Enter RAHUL50 or DIWALI100" 
+              class="flex-1 uppercase font-bold text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#9c1261] bg-white placeholder-slate-400"
+            />
+            <button onclick="window.applyPromoCodeManual()" class="bg-[#9c1261] hover:bg-[#850f52] text-white px-3 py-1.5 rounded-lg font-bold text-xs shadow-sm">
+              Apply
+            </button>
+          </div>
+
+          <!-- Quick Tap Offer Cards -->
+          <div class="grid grid-cols-2 gap-1.5 pt-1 text-[10px]">
+            <div onclick="window.autoApplyCoupon('RAHUL50')" class="bg-white/80 border border-pink-300 p-1.5 rounded-lg cursor-pointer hover:border-[#9c1261] flex justify-between items-center shadow-xs">
+              <div>
+                <p class="font-black text-slate-900 tracking-wider">RAHUL50</p>
+                <p class="text-[9px] text-slate-500">₹50 OFF on ₹200+</p>
+              </div>
+              <span class="text-[#9c1261] font-bold text-[9px]">Apply ➔</span>
+            </div>
+            <div onclick="window.autoApplyCoupon('DIWALI100')" class="bg-white/80 border border-pink-300 p-1.5 rounded-lg cursor-pointer hover:border-[#9c1261] flex justify-between items-center shadow-xs">
+              <div>
+                <p class="font-black text-slate-900 tracking-wider">DIWALI100</p>
+                <p class="text-[9px] text-slate-500">₹100 OFF on ₹499+</p>
+              </div>
+              <span class="text-[#9c1261] font-bold text-[9px]">Apply ➔</span>
+            </div>
+          </div>
+
+          <!-- Applied Promo Badge / Remove Button -->
+          <div id="appliedPromoStatus" class="hidden flex items-center justify-between bg-emerald-50 border border-emerald-300 text-emerald-800 px-2 py-1 rounded-lg text-xs font-semibold">
+            <span id="appliedPromoText"><i class="fa-solid fa-circle-check text-emerald-600"></i> Coupon Applied</span>
+            <button onclick="window.removeAppliedPromo()" class="text-red-500 hover:text-red-700 text-[10px] font-bold">Remove</button>
+          </div>
+          <p id="promoFeedbackMsg" class="hidden text-[10px] font-semibold text-center"></p>
+        </div>
+
+        <div id="cartCalculationBox" class="mt-3 bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs space-y-1.5">
+          <div class="flex justify-between text-slate-600">
+            <span>Items Subtotal</span>
+            <span id="billSubtotal">₹0</span>
+          </div>
+          <div id="billDiscountRow" class="hidden flex justify-between text-emerald-600 font-bold">
+            <span id="billDiscountLabel">Coupon Discount</span>
+            <span id="billDiscountAmount">-₹0</span>
+          </div>
+          <div class="flex justify-between text-slate-600">
+            <span>Delivery Fee</span>
+            <span id="billDeliveryFee" class="font-bold">₹0</span>
+          </div>
+          <div class="flex justify-between text-slate-600">
+            <span>COD Handling Fee</span>
+            <span id="billCodFee">₹0</span>
+          </div>
+          <div class="flex justify-between font-extrabold text-slate-900 pt-2 border-t text-sm">
+            <span>Total Payable</span>
+            <span id="billFinalAmount" class="text-[#9c1261]">₹0</span>
+          </div>
+        </div>
+
+        <button onclick="window.goToAddressStep()" id="proceedToAddressBtn" class="w-full mt-3 bg-[#9c1261] hover:bg-[#850f52] text-white py-2.5 rounded-lg font-bold text-xs shadow flex items-center justify-center gap-1.5">
+          <span>Proceed to Delivery Address</span>
+          <i class="fa-solid fa-arrow-right text-[10px]"></i>
+        </button>
+      </div>
+
+      <!-- Step 2: Address Form With Zero Data Loss Auto-Save -->
+      <div id="addressStepView" class="hidden bg-white rounded-xl border border-slate-200 p-3 shadow-sm">
+        <div class="flex items-center justify-between border-b pb-2 mb-2">
+          <div>
+            <h3 class="font-bold text-sm text-slate-900">Delivery Address in Supaul</h3>
+            <p class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+              <i class="fa-solid fa-cloud-arrow-up"></i> Auto-saved on this device
+            </p>
+          </div>
+          <button onclick="window.backToCartView()" class="text-xs text-slate-500 font-medium">Back to Cart</button>
+        </div>
+        <form id="addressFormElement" class="space-y-2.5 text-xs">
+          <div>
+            <label class="block text-slate-700 font-semibold mb-1">Customer Full Name *</label>
+            <input type="text" id="custName" oninput="window.autoSaveUserProfile()" required minlength="3" placeholder="e.g. Ramesh Kumar" class="w-full border rounded-lg p-2 outline-none focus:border-[#9c1261]" />
+          </div>
+          <div>
+            <label class="block text-slate-700 font-semibold mb-1">10-Digit Mobile Number (WhatsApp) *</label>
+            <input type="tel" id="custPhone" oninput="window.autoSaveUserProfile()" pattern="[6-9][0-9]{9}" required placeholder="e.g. 9876543210" class="w-full border rounded-lg p-2 outline-none focus:border-[#9c1261]" />
+          </div>
+          <div>
+            <label class="block text-slate-700 font-semibold mb-1">Delivery Address (Ward, Village, Street) *</label>
+            <textarea id="custAddress" oninput="window.autoSaveUserProfile()" required minlength="8" rows="2" placeholder="House no, Ward, Landmark in Supaul" class="w-full border rounded-lg p-2 outline-none focus:border-[#9c1261]"></textarea>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-slate-700 font-semibold mb-1">Area / Pin Code</label>
+              <input type="text" id="custPincode" disabled value="Supaul Sadar - 852131" class="w-full border rounded-lg p-2 bg-slate-100 font-bold text-slate-600" />
+            </div>
+            <div>
+              <label class="block text-slate-700 font-semibold mb-1">Nearest Landmark *</label>
+              <input type="text" id="custLandmark" oninput="window.autoSaveUserProfile()" required placeholder="Near Temple / School / Chowk" class="w-full border rounded-lg p-2 outline-none focus:border-[#9c1261]" />
+            </div>
+          </div>
+          <button type="submit" class="w-full mt-2 bg-[#9c1261] text-white py-2.5 rounded-lg font-bold text-xs shadow">
+            Select Payment Method ➔
+          </button>
+        </form>
+      </div>
+
+      <!-- Step 3: Payment Options -->
+      <div id="paymentStepView" class="hidden bg-white rounded-xl border border-slate-200 p-3 shadow-sm">
+        <div class="flex items-center justify-between border-b pb-2 mb-3">
+          <h3 class="font-bold text-sm text-slate-900">Choose Payment Method</h3>
+          <button onclick="window.backToAddressView()" class="text-slate-500 font-medium">Back</button>
+        </div>
+
+        <div class="space-y-2 text-xs">
+          <label class="block border border-[#9c1261] bg-pink-50/40 p-3 rounded-xl cursor-pointer">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <input type="radio" name="paymentMethod" value="ONLINE" checked onchange="window.togglePaymentSelection('ONLINE')" class="accent-[#9c1261]" />
+                <div>
+                  <span class="font-bold text-slate-900">Pay via UPI QR (Merchant Direct)</span>
+                  <p class="text-[11px] text-slate-500">Paytm, PhonePe, GPay, BHIM</p>
+                </div>
+              </div>
+              <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">Zero COD Fee</span>
+            </div>
+          </label>
+
+          <label class="block border border-slate-200 p-3 rounded-xl cursor-pointer">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <input type="radio" name="paymentMethod" value="COD" onchange="window.togglePaymentSelection('COD')" class="accent-[#9c1261]" />
+                <div>
+                  <span class="font-bold text-slate-900">Cash on Delivery (COD)</span>
+                  <p class="text-[11px] text-slate-500">Pay cash upon delivery in Supaul District</p>
+                </div>
+              </div>
+              <span id="codBadgeText" class="text-[10px] bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded">COD</span>
+            </div>
+          </label>
+        </div>
+
+        <div class="mt-3 bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs space-y-1">
+          <div class="flex justify-between text-slate-600">
+            <span>Subtotal:</span>
+            <span id="paySubtotal">₹0</span>
+          </div>
+          <div id="payDiscountRow" class="hidden flex justify-between text-emerald-600 font-bold">
+            <span>Coupon Discount:</span>
+            <span id="payDiscountAmount">-₹0</span>
+          </div>
+          <div class="flex justify-between text-slate-600">
+            <span>Delivery:</span>
+            <span id="payDelivery">₹0</span>
+          </div>
+          <div class="flex justify-between text-slate-600">
+            <span>COD Handling Fee:</span>
+            <span id="payCodFee">₹0</span>
+          </div>
+          <div class="flex justify-between font-extrabold text-slate-900 pt-2 border-t text-sm">
+            <span>Final Payable:</span>
+            <span id="payFinalTotal" class="text-[#9c1261]">₹0</span>
+          </div>
+        </div>
+
+        <div id="orderSyncErrorMsg" class="hidden mt-2 p-2 bg-red-50 border border-red-200 text-red-700 text-center rounded-lg text-xs font-semibold"></div>
+
+        <button id="finalPayBtn" onclick="window.executeOrderFlow()" class="w-full mt-3 bg-[#002e6e] text-white py-2.5 rounded-lg font-bold text-xs shadow flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-qrcode"></i>
+          <span>Pay via Merchant UPI QR</span>
+        </button>
+      </div>
+
+      <!-- Step 4: Confirmed Order Receipt -->
+      <div id="orderSuccessView" class="hidden bg-white rounded-xl border border-slate-200 p-5 text-center shadow-lg">
+        <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-2.5 text-2xl font-bold shadow-inner">
+          <i class="fa-solid fa-check"></i>
+        </div>
+        <h3 class="font-black text-slate-900 text-lg leading-tight">Order Placed Successfully! 🎉</h3>
+        <p class="text-xs text-slate-500 mt-1">Order Tracking Ref: <span id="successOrderId" class="font-mono font-bold text-slate-800">MM-000000</span></p>
+
+        <div class="my-3.5 bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-left text-xs space-y-1.5 text-slate-700">
+          <p><strong>Customer:</strong> <span id="successCustName"></span></p>
+          <p><strong>Phone:</strong> <span id="successCustPhone"></span></p>
+          <p><strong>Amount:</strong> <span id="successAmount" class="font-bold text-[#9c1261] text-sm"></span></p>
+          <p id="successCouponRow" class="hidden"><strong>Promo Applied:</strong> <span id="successCouponVal" class="font-bold text-emerald-600"></span></p>
+          <p><strong>Order Status:</strong> <span id="successOrderStatus" class="font-bold text-slate-900">Order Placed</span></p>
+          <p><strong>Payment State:</strong> <span id="successPaymentType" class="font-bold"></span></p>
+          <p id="successUtrRow" class="hidden"><strong>Submitted UTR:</strong> <span id="successUtrVal" class="font-mono text-slate-800"></span></p>
+          <p class="text-[11px] text-emerald-700 font-semibold pt-1.5 border-t flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-check text-emerald-500"></i> Logged in MithilaMart Registry
+          </p>
+        </div>
+
+        <button onclick="window.openTrackWithId(document.getElementById('successOrderId').innerText)" class="w-full bg-[#9c1261] hover:bg-[#850f52] text-white py-2.5 rounded-xl font-bold text-xs shadow-md flex items-center justify-center gap-2 mb-2">
+          <i class="fa-solid fa-truck-fast"></i>
+          <span>Track Order Timeline</span>
+        </button>
+
+        <button onclick="window.sendOrderReceiptToWhatsapp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-bold text-xs shadow-md flex items-center justify-center gap-2 mb-2">
+          <i class="fa-brands fa-whatsapp text-sm"></i>
+          <span>Send Order Slip to WhatsApp</span>
+        </button>
+        <button onclick="window.switchTab('home')" class="w-full bg-slate-100 text-slate-800 py-2.5 rounded-xl font-semibold text-xs">
+          Back to Store Catalog
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB 3: WISHLIST -->
+    <div id="wishlistTab" class="hidden space-y-3">
+      <h3 class="font-bold text-sm text-slate-900">Saved Items</h3>
+      <div id="wishlistGrid" class="grid grid-cols-2 gap-2"></div>
+    </div>
+
+    <!-- TAB 4: REAL-TIME TRACKING & SAVED ORDERS (MEESHO STYLE) -->
+    <div id="trackTab" class="hidden space-y-3">
+      <div class="bg-white border rounded-xl p-3.5 shadow-sm text-xs">
+        <h3 class="font-black text-slate-900 text-sm mb-1 flex items-center gap-1.5">
+          <i class="fa-solid fa-truck-fast text-[#9c1261]"></i> Track Your Delivery
+        </h3>
+        <p class="text-slate-500 text-[11px] mb-3">Enter your 10-digit mobile number or unique Order ID</p>
+
+        <div class="flex gap-2">
+          <input 
+            type="text" 
+            id="trackSearchQuery" 
+            placeholder="e.g. 9876543210 or MM-XXXXXX" 
+            class="flex-1 border-2 border-slate-200 rounded-lg p-2.5 outline-none focus:border-[#9c1261] text-xs font-semibold"
+          />
+          <button onclick="window.executeOrderTracking()" class="bg-[#9c1261] hover:bg-[#850f52] text-white px-4 rounded-lg font-bold shadow text-xs">
+            Track
+          </button>
+        </div>
+      </div>
+
+      <!-- Recent Stored Orders on this phone -->
+      <div id="myRecentOrdersSection" class="hidden space-y-2">
+        <h4 class="font-black text-xs text-slate-700 flex items-center gap-1">
+          <i class="fa-solid fa-clock-rotate-left text-amber-500"></i> My Recent Orders
+        </h4>
+        <div id="myRecentOrdersList" class="space-y-2"></div>
+      </div>
+
+      <div id="trackingResultBox" class="space-y-3"></div>
+    </div>
+
+    <!-- TAB 5: MERCHANT ADMINISTRATIVE VIEW -->
+    <div id="adminTab" class="hidden space-y-4">
+      <div class="bg-slate-900 text-white p-3.5 rounded-xl flex items-center justify-between">
+        <div>
+          <h3 class="font-black text-sm text-amber-300">MithilaMart Admin Console</h3>
+          <p class="text-[10px] text-slate-300">Operations: Mr. Rahul Jaiswal</p>
+        </div>
+        <button onclick="window.logoutAdmin()" class="bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg">
+          Exit Admin
+        </button>
+      </div>
+
+      <div class="bg-white border-2 border-[#9c1261] rounded-xl p-3.5 shadow-sm text-xs">
+        <h4 class="font-black text-slate-900 mb-2 flex items-center gap-1 text-sm text-[#9c1261]">
+          <i class="fa-solid fa-plus-circle"></i> Add Custom Store Inventory
+        </h4>
+        <form id="newProductFormElement" class="space-y-2">
+          <div>
+            <label class="block text-slate-700 font-bold mb-0.5">Product Title *</label>
+            <input type="text" id="newProdName" required placeholder="e.g. Pure Clay Handcrafted Diya" class="w-full border p-2 rounded outline-none" />
+          </div>
+          <div>
+            <label class="block text-slate-700 font-bold mb-0.5">Category *</label>
+            <select id="newProdCategory" class="w-full border p-2 rounded bg-white outline-none font-semibold">
+              <option value="Traditional earthen diyas">Traditional earthen diyas</option>
+              <option value="Green Firecrackers & Sparklers">Green Firecrackers & Sparklers</option>
+              <option value="LED diyas & Lights">LED diyas & Lights</option>
+              <option value="Puja & Idols">Puja & Idols</option>
+            </select>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-slate-700 font-bold mb-0.5">Selling Price (₹) *</label>
+              <input type="number" id="newProdPrice" min="1" required placeholder="149" class="w-full border p-2 rounded font-bold outline-none" />
+            </div>
+            <div>
+              <label class="block text-slate-700 font-bold mb-0.5">Original MRP (₹) *</label>
+              <input type="number" id="newProdMrp" min="1" required placeholder="299" class="w-full border p-2 rounded font-bold outline-none" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-slate-700 font-bold mb-0.5">Photo Link(s) (Comma separated URLs) *</label>
+            <input type="text" id="newProdImage" required placeholder="https://url1.jpg, https://url2.jpg" class="w-full border p-2 rounded text-[11px] outline-none" />
+          </div>
+          <div>
+            <label class="block text-slate-700 font-bold mb-0.5">Highlight Tag / Badge</label>
+            <input type="text" id="newProdBadge" placeholder="e.g. Trending Item" class="w-full border p-2 rounded outline-none" />
+          </div>
+          <button type="submit" class="w-full mt-2 bg-[#9c1261] hover:bg-[#850f52] text-white py-2.5 rounded-lg font-bold shadow text-xs">
+            Save Product to Local Catalog
+          </button>
+        </form>
+      </div>
+
+      <div class="bg-white border rounded-xl p-3 shadow-sm text-xs">
+        <h4 class="font-black text-slate-900 mb-2">Active Store Items (<span id="adminProdCount">0</span>)</h4>
+        <div id="adminProductList" class="divide-y divide-slate-100 max-h-96 overflow-y-auto"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MEESHO-STYLE MULTI-IMAGE PRODUCT DETAIL MODAL -->
+  <div id="productDetailModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-3 hidden">
+    <div class="bg-white rounded-t-2xl sm:rounded-2xl max-w-lg w-full max-h-[92vh] overflow-y-auto shadow-2xl animate-slide-up text-xs flex flex-col">
+      <div class="sticky top-0 bg-white/95 backdrop-blur z-20 px-3 py-2 border-b flex items-center justify-between">
+        <span class="font-bold text-slate-700 text-xs">Product Details & Customer Photos</span>
+        <button onclick="window.closeProductDetailModal()" class="w-7 h-7 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-slate-200">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <div class="p-3 space-y-3">
+        <!-- Main Product Photo Viewer -->
+        <div class="relative bg-slate-100 rounded-xl overflow-hidden min-h-[14rem] flex items-center justify-center">
+          <img id="detailModalMainImg" src="" alt="Product" class="w-full h-60 object-cover" />
+          <span id="detailModalDiscountBadge" class="absolute top-2.5 left-2.5 bg-[#9c1261] text-white font-black text-[10px] px-2 py-0.5 rounded shadow"></span>
+          <span id="detailModalTag" class="absolute top-2.5 right-2.5 bg-amber-400 text-slate-950 font-bold text-[10px] px-2 py-0.5 rounded shadow"></span>
+        </div>
+
+        <!-- Meesho-Style Multi-Image Carousel / Thumbnails -->
+        <div id="detailThumbnailsSection">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+              <i class="fa-solid fa-images text-[#9c1261]"></i> Product & Review Snaps (<span id="photoCountBadge">1</span>)
+            </span>
+            <span class="text-[9px] text-slate-400">Tap to switch view</span>
+          </div>
+          <div id="detailThumbnailsTrack" class="flex gap-2 overflow-x-auto scrollbar-hide py-1"></div>
+        </div>
+
+        <div>
+          <span id="detailModalCategory" class="text-[10px] uppercase font-bold text-slate-400 tracking-wider"></span>
+          <h3 id="detailModalTitle" class="text-sm font-black text-slate-900 leading-snug mt-0.5"></h3>
+          
+          <div class="flex items-baseline gap-2 mt-1.5">
+            <span id="detailModalPrice" class="text-lg font-black text-[#9c1261]">₹0</span>
+            <span id="detailModalMrp" class="text-xs text-slate-400 line-through">₹0</span>
+            <span id="detailModalSaveText" class="text-[11px] text-emerald-700 font-bold"></span>
+          </div>
+
+          <div class="flex items-center gap-2 mt-1.5">
+            <span class="inline-flex items-center gap-1 bg-emerald-600 text-white font-black text-[10px] px-1.5 py-0.5 rounded">
+              <span id="detailModalRating">4.9</span> <i class="fa-solid fa-star text-[8px]"></i>
+            </span>
+            <span id="detailModalReviewCount" class="text-[11px] text-slate-500 font-medium">Ratings in Supaul District</span>
+          </div>
+        </div>
+
+        <div class="bg-pink-50/60 border border-pink-200/60 rounded-xl p-2.5 text-[11px] space-y-1">
+          <div class="flex items-center gap-1.5 text-slate-800 font-bold">
+            <i class="fa-solid fa-truck-fast text-[#9c1261]"></i>
+            <span>Local District Delivery (24 - 48 Hours)</span>
+          </div>
+          <p class="text-slate-600 text-[10px]">Free doorstep delivery on orders above ₹199. Cash on Delivery supported.</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <button id="detailModalWaBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-2 rounded-xl flex items-center justify-center gap-1.5 shadow text-xs">
+            <i class="fa-brands fa-whatsapp text-sm"></i>
+            <span>Order on WA</span>
+          </button>
+          <button id="detailModalCartBtn" class="bg-[#9c1261] hover:bg-[#850f52] text-white font-bold py-2.5 px-2 rounded-xl flex items-center justify-center gap-1.5 shadow text-xs">
+            <i class="fa-solid fa-bag-shopping text-xs"></i>
+            <span>Add to Cart</span>
+          </button>
+        </div>
+
+        <!-- Verified Reviews Feedback -->
+        <div class="pt-2 border-t border-slate-100">
+          <h4 class="font-black text-slate-900 text-xs flex items-center gap-1 mb-2">
+            <i class="fa-solid fa-comment-dots text-amber-500"></i> Verified Supaul Buyer Feedback
+          </h4>
+          <div id="detailModalReviewsList" class="space-y-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAYTM / UPI MERCHANT QR MODAL -->
+  <div id="upiPaymentModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden">
+    <div class="bg-white rounded-2xl max-w-sm w-full overflow-hidden shadow-2xl animate-slide-up text-xs">
+      <div class="bg-[#002e6e] text-white p-3 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-full bg-white text-[#002e6e] font-black flex items-center justify-center text-xs">₹</div>
+          <div>
+            <h4 class="font-bold text-xs flex items-center gap-1">Bebi Chaudhary <i class="fa-solid fa-circle-check text-blue-400 text-[10px]"></i></h4>
+            <p class="text-[10px] text-blue-200">Official Merchant UPI</p>
+          </div>
+        </div>
+        <button onclick="window.closeUpiModal()" class="text-white/80 hover:text-white"><i class="fa-solid fa-xmark text-sm"></i></button>
+      </div>
+
+      <div class="p-4 text-center">
+        <div class="border-2 border-slate-200 rounded-xl p-2 inline-block bg-white shadow-sm">
+          <img 
+            id="dynamicQrCodeImg" 
+            src="" 
+            alt="Merchant UPI QR" 
+            class="w-44 h-44 mx-auto object-contain rounded-lg"
+          />
+          <div class="mt-1 font-bold text-slate-700 text-[11px]">
+            <span id="qrPayableAmountText">Pay Exact: ₹0</span>
+          </div>
+        </div>
+
+        <div class="mt-2 text-[11px] font-semibold text-slate-600 bg-slate-100 py-1 px-2 rounded inline-block">
+          UPI ID: <span class="font-mono text-slate-900 select-all">6205005743@ptyes</span>
+        </div>
+
+        <a id="directUpiAppBtn" href="#" class="mt-2.5 w-full bg-[#00baF2] hover:bg-[#0099cc] text-white py-2 rounded-lg font-bold flex items-center justify-center gap-1.5 shadow">
+          <span>Open Installed UPI App</span>
+          <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+        </a>
+
+        <div class="mt-3.5 pt-3 border-t border-slate-100 text-left space-y-1.5">
+          <label class="block font-bold text-slate-800 text-[11px]">Enter 12-Digit Banking Reference / UTR *</label>
+          <input 
+            type="text" 
+            id="upiUtrInput" 
+            maxlength="12" 
+            pattern="[0-9]{12}"
+            placeholder="e.g. 429812345678" 
+            class="w-full border-2 border-slate-300 rounded-lg p-2 font-mono text-center font-bold text-sm tracking-wider outline-none"
+          />
+          <p class="text-[10px] text-slate-500">Notice: Orders are accepted under manual payment audit until transaction credit is reconciled.</p>
+          <p id="utrErrorMsg" class="hidden text-red-600 text-[10px] font-semibold text-center">
+            Valid 12-digit numeric reference required.
+          </p>
+          <button onclick="window.submitUpiOrderForVerification()" class="w-full mt-2 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold text-xs shadow">
+            Submit Order for Store Verification
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIN CODE MODAL -->
+  <div id="pincodeModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 hidden">
+    <div class="bg-white rounded-xl p-4 max-w-xs w-full shadow-2xl text-xs">
+      <div class="flex items-center justify-between mb-2">
+        <h4 class="font-bold text-slate-900">Supported Supaul Zones</h4>
+        <button onclick="window.closePincodeModal()" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="space-y-1.5">
+        <button onclick="window.selectPincode('852131', 'Supaul Sadar')" class="w-full text-left p-2 border rounded-lg hover:border-[#9c1261] font-semibold flex justify-between">
+          <span>852131 - Supaul Sadar</span>
+          <span class="text-emerald-600">Active</span>
+        </button>
+        <button onclick="window.selectPincode('852125', 'Nirmali')" class="w-full text-left p-2 border rounded-lg hover:border-[#9c1261] font-semibold flex justify-between">
+          <span>852125 - Nirmali</span>
+          <span class="text-emerald-600">Active</span>
+        </button>
+        <button onclick="window.selectPincode('852128', 'Pipra')" class="w-full text-left p-2 border rounded-lg hover:border-[#9c1261] font-semibold flex justify-between">
+          <span>852128 - Pipra</span>
+          <span class="text-emerald-600">Active</span>
+        </button>
+        <button onclick="window.selectPincode('852130', 'Triveniganj')" class="w-full text-left p-2 border rounded-lg hover:border-[#9c1261] font-semibold flex justify-between">
+          <span>852130 - Triveniganj</span>
+          <span class="text-emerald-600">Active</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- USER PROFILE MODAL -->
+  <div id="loginModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-xs w-full p-4 shadow-2xl text-xs space-y-3 animate-slide-up">
+      <div class="flex items-center justify-between border-b pb-2">
+        <div class="flex items-center gap-1.5">
+          <span class="text-[#9c1261] text-base"><i class="fa-solid fa-user-check"></i></span>
+          <h4 class="font-bold text-slate-900 text-sm">Customer Profile</h4>
+        </div>
+        <button onclick="window.closeLoginModal()" class="text-slate-400 hover:text-slate-600">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <p class="text-[11px] text-slate-500">
+        Apna Naam aur Phone number save karein taaki aapka address, bag aur order history refresh hone par bhi safe rahein.
+      </p>
+
+      <div class="space-y-2">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-0.5">Customer Name</label>
+          <input type="text" id="loginCustName" placeholder="e.g. Ramesh Kumar" class="w-full border rounded-lg p-2 outline-none focus:border-[#9c1261]" />
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-0.5">10-Digit Mobile Number *</label>
+          <input type="tel" id="loginCustPhone" pattern="[6-9][0-9]{9}" placeholder="e.g. 9876543210" class="w-full border rounded-lg p-2 font-mono outline-none focus:border-[#9c1261]" />
+        </div>
+      </div>
+
+      <button onclick="window.saveCustomerLogin()" class="w-full bg-[#9c1261] hover:bg-[#850f52] text-white py-2.5 rounded-lg font-bold shadow text-xs flex items-center justify-center gap-1.5">
+        <i class="fa-solid fa-circle-check"></i>
+        <span>Save Profile Info</span>
+      </button>
+
+      <div id="userLogoutSection" class="hidden pt-1 border-t text-center">
+        <button onclick="window.userLogout()" class="text-red-500 hover:underline text-[11px] font-semibold">
+          Clear saved profile on this device
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN PASSCODE MODAL -->
+  <div id="adminPinModal" class="fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-xl p-4 max-w-xs w-full shadow-2xl text-xs text-center">
+      <div class="w-10 h-10 bg-slate-900 text-amber-300 rounded-full flex items-center justify-center mx-auto mb-2 text-lg">
+        <i class="fa-solid fa-lock"></i>
+      </div>
+      <h4 class="font-black text-slate-900 text-sm">Merchant Portal Login</h4>
+      <p class="text-slate-500 text-[11px] mt-0.5">Authorised administrators only</p>
+      <input 
+        type="password" 
+        id="adminSecretPinInput" 
+        maxlength="16" 
+        placeholder="••••" 
+        class="w-36 border-2 border-slate-300 rounded-lg p-2 font-mono text-center text-base tracking-widest my-3 focus:border-[#9c1261] outline-none"
+      />
+      <div class="flex gap-2">
+        <button onclick="window.closeAdminPinModal()" class="w-1/2 bg-slate-100 text-slate-700 py-2 rounded-lg font-bold">Cancel</button>
+        <button onclick="window.verifyAdminSession()" class="w-1/2 bg-[#9c1261] text-white py-2 rounded-lg font-bold">Authenticate</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING WHATSAPP BUTTON (Orders to Primary Number: 7484005743) -->
+  <a 
+    href="https://wa.me/917484005743?text=Namaste%20Rahul%20ji,%20MithilaMart%20store%20inquiry" 
+    target="_blank" 
+    class="fixed bottom-16 right-3 bg-emerald-500 hover:bg-emerald-600 text-white w-12 h-12 rounded-full flex items-center justify-center text-2xl shadow-xl z-40 transition-transform active:scale-95"
+    title="Chat on WhatsApp"
+  >
+    <i class="fa-brands fa-whatsapp"></i>
+  </a>
+
+  <!-- FOOTER WITH FOUNDER & CREATOR PROFILE CARD -->
+  <footer class="mt-8 bg-slate-900 text-slate-300 px-4 pt-6 pb-20 text-center text-xs">
+    <div class="max-w-md mx-auto space-y-3">
+      <div class="flex items-center justify-center gap-1.5 text-white font-extrabold text-base">
+        <span>🛍️</span>
+        <span>MithilaMart — Supaul</span>
+      </div>
+
+      <!-- PROFESSIONAL FOUNDER & CREATOR CARD -->
+      <div class="bg-gradient-to-b from-slate-800 to-slate-900 border border-slate-700 rounded-2xl p-4 text-slate-200 shadow-md">
+        <div class="flex flex-col items-center text-center">
+          <!-- Circular Profile Photo with Gold Ring & Fallback -->
+          <div class="relative w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-amber-400 to-[#9c1261] shadow-lg mb-2.5">
+            <img 
+              src="rahul.jpg" 
+              alt="Rahul Jaiswal" 
+              onerror="this.onerror=null; this.src='https://placehold.co/200x200/9c1261/ffffff?text=Rahul+Jaiswal';" 
+              class="w-full h-full object-cover object-top rounded-full bg-slate-800"
+            />
+          </div>
+          
+          <h4 class="font-extrabold text-sm text-white tracking-wide">Rahul Jaiswal</h4>
+          <p class="text-[10px] text-amber-400 font-bold uppercase tracking-wider -mt-0.5">Founder & Operations Lead</p>
+          <p class="text-[11px] text-slate-400 mt-1">📍 Supaul District, Bihar</p>
+
+          <!-- Social, Email & Helpline Contact Links -->
+          <div class="grid grid-cols-2 gap-2 w-full mt-3 pt-3 border-t border-slate-700/80 text-[11px]">
+            <a href="mailto:RahulJaiswal6205@gmail.com" class="flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 py-1.5 px-2 rounded-lg border border-slate-600/60 transition">
+              <i class="fa-solid fa-envelope text-red-400"></i>
+              <span class="truncate">Email Support</span>
+            </a>
+            <a href="https://instagram.com/official_rahul_675" target="_blank" class="flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-pink-300 py-1.5 px-2 rounded-lg border border-slate-600/60 transition">
+              <i class="fa-brands fa-instagram text-pink-400"></i>
+              <span>@official_rahul_675</span>
+            </a>
+            <a href="tel:+916205005743" class="flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 py-1.5 px-2 rounded-lg border border-slate-600/60 transition">
+              <i class="fa-solid fa-phone text-amber-400"></i>
+              <span>Help: 6205005743</span>
+            </a>
+            <a href="https://wa.me/917484005743" target="_blank" class="flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-emerald-300 py-1.5 px-2 rounded-lg border border-slate-600/60 transition">
+              <i class="fa-brands fa-whatsapp text-emerald-400"></i>
+              <span>Order: 7484005743</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <p id="secretAdminTrigger" onclick="window.handleSecretTap()" class="cursor-pointer select-none text-slate-500 text-[10px] pt-1">
+        © 2026 MithilaMart. All Rights Reserved. Built for seamless shopping across Supaul & Mithila.
+      </p>
+    </div>
+  </footer>
+
+  <!-- BOTTOM NAVIGATION BAR -->
+  <nav id="bottomAppNav" class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 py-1.5 px-3 flex justify-around items-center z-40 text-[10px] font-semibold shadow-lg">
+    <button onclick="window.switchTab('home')" id="navHome" class="flex flex-col items-center text-[#9c1261]">
+      <i class="fa-solid fa-house text-base"></i>
+      <span>Home</span>
+    </button>
+    <button onclick="window.setCategoryAndOpen('Green Firecrackers & Sparklers')" class="flex flex-col items-center text-slate-500">
+      <i class="fa-solid fa-sparkles text-base text-amber-500"></i>
+      <span>Sparklers</span>
+    </button>
+    <button onclick="window.switchTab('track')" id="navTrack" class="flex flex-col items-center text-slate-500">
+      <i class="fa-solid fa-truck-fast text-base text-[#9c1261]"></i>
+      <span>Track</span>
+    </button>
+    <button onclick="window.switchTab('wishlist')" id="navWishlist" class="flex flex-col items-center text-slate-500">
+      <i class="fa-solid fa-heart text-base"></i>
+      <span>Wishlist</span>
+    </button>
+    <button onclick="window.switchTab('cart')" id="navCart" class="flex flex-col items-center text-slate-500 relative">
+      <i class="fa-solid fa-bag-shopping text-base"></i>
+      <span>Cart</span>
+      <span id="navCartDot" class="hidden absolute top-0 right-1 w-2 h-2 rounded-full bg-[#9c1261]"></span>
+    </button>
+  </nav>
+
+  <!-- JAVASCRIPT ENGINE (DUAL PHONE NUMBERS & STRICT TYPING FOR 0 PROBLEMS) -->
+  <script>
+    var APP_CONFIG = {
+      upiId: '6205005743@ptyes',
+      merchantName: 'Bebi Chaudhary',
+      rawPhone: '917484005743',
+      helplinePhone: '916205005743',
+      supportEmail: 'RahulJaiswal6205@gmail.com',
+      instagramHandle: 'official_rahul_675',
+      coFounder: 'Mr. Rahul Jaiswal',
+      freeDeliveryLimit: 199,
+      standardDeliveryFee: 40,
+      codFeeBelow99: 19,
+      selectedPincode: '852131',
+      selectedArea: 'Supaul Sadar',
+      supportedPins: ['852131', '852125', '852128', '852130']
+    };
+
+    var GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1N_-Y20rKZH4n-7cbGqYY8251eHCJmFa34N-aWf4XVZk/gviz/tq?tqx=out:csv';
+    var GOOGLE_SHEET_ORDERS_CSV_URL = 'https://docs.google.com/spreadsheets/d/1N_-Y20rKZH4n-7cbGqYY8251eHCJmFa34N-aWf4XVZk/gviz/tq?tqx=out:csv&sheet=Orders';
+    var ORDER_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbwq1r1hjJp0Z7pK1FRD4K1R1wS3csYPij6xssvbrMILYlVJBEdghRJe1ofrRBvq8iCaGg/exec';
+
+    /** @type {any[]} */
+    var PRODUCTS = [];
+    /** @type {any[]} */
+    var cart = [];
+    /** @type {any[]} */
+    var wishlist = [];
+    /** @type {any[]} */
+    var myOrdersHistory = [];
+    /** @type {string} */
+    var selectedCategory = 'All';
+    /** @type {string} */
+    var selectedPaymentMode = 'ONLINE';
+    /** @type {any} */
+    var customerInfo = {};
+    /** @type {any} */
+    var latestOrder = null;
+    /** @type {number} */
+    var secretTapCount = 0;
+    /** @type {any} */
+    var secretTapTimer = null;
+    /** @type {string|null} */
+    var appliedPromoCode = null;
+    /** @type {any} */
+    var autoSlideInterval = null;
+
+    function initLocalStorageData() {
+      try {
+        var c = localStorage.getItem('mithilamart_cart') || localStorage.getItem('utsavdeep_cart');
+        cart = c ? JSON.parse(c) : [];
+      } catch (e) { cart = []; }
+
+      try {
+        var w = localStorage.getItem('mithilamart_wishlist') || localStorage.getItem('utsavdeep_wishlist');
+        wishlist = w ? JSON.parse(w) : [];
+      } catch (e) { wishlist = []; }
+
+      try {
+        var u = localStorage.getItem('mithilamart_user_profile') || localStorage.getItem('utsavdeep_user_profile');
+        customerInfo = u ? JSON.parse(u) : {};
+      } catch (e) { customerInfo = {}; }
+
+      try {
+        var o = localStorage.getItem('mithilamart_my_orders') || localStorage.getItem('utsavdeep_my_orders');
+        myOrdersHistory = o ? JSON.parse(o) : [];
+      } catch (e) { myOrdersHistory = []; }
+
+      try {
+        var p = localStorage.getItem('mithilamart_applied_promo');
+        appliedPromoCode = p || null;
+      } catch (e) { appliedPromoCode = null; }
+    }
+
+    function saveCartState() {
+      localStorage.setItem('mithilamart_cart', JSON.stringify(cart));
+      updateCartBadge();
+      renderCart();
+    }
+
+    function saveWishlistState() {
+      localStorage.setItem('mithilamart_wishlist', JSON.stringify(wishlist));
+    }
+
+    function saveOrdersHistoryState() {
+      localStorage.setItem('mithilamart_my_orders', JSON.stringify(myOrdersHistory));
+      renderMyRecentOrders();
+    }
+
+    function playAddToCartFeedback() {
+      try {
+        if ('vibrate' in navigator) {
+          navigator.vibrate(35);
+        }
+      } catch (e) {}
+
+      try {
+        var AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        var ctx = new AudioCtx();
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(650, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(980, ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.12, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.14);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.15);
+      } catch (err) {}
+    }
+
+    function startFlashSaleTimer() {
+      var duration = 4 * 3600 + 28 * 60 + 15;
+      setInterval(function() {
+        if (duration <= 0) duration = 8 * 3600;
+        duration--;
+        var h = Math.floor(duration / 3600);
+        var m = Math.floor((duration % 3600) / 60);
+        var s = duration % 60;
+        var timerEl = document.getElementById('flashSaleTimer');
+        if (timerEl) {
+          timerEl.innerText = (h < 10 ? '0' + h : h) + 'h:' + (m < 10 ? '0' + m : m) + 'm:' + (s < 10 ? '0' + s : s) + 's';
+        }
+      }, 1000);
+    }
+
+    /**
+     * @param {number} subtotal
+     * @returns {number}
+     */
+    function evaluatePromoDiscount(subtotal) {
+      if (!appliedPromoCode) return 0;
+      var code = appliedPromoCode.toUpperCase();
+      if (code === 'RAHUL50') {
+        if (subtotal >= 200) return 50;
+      } else if (code === 'DIWALI100') {
+        if (subtotal >= 499) return 100;
+      }
+      return 0;
+    }
+
+    /**
+     * @param {string} code
+     */
+    window.autoApplyCoupon = function(code) {
+      var inEl = /** @type {HTMLInputElement} */ (document.getElementById('promoInputCode'));
+      if (inEl) inEl.value = code;
+      window.applyPromoCodeManual();
+    };
+
+    window.applyPromoCodeManual = function() {
+      var inEl = /** @type {HTMLInputElement} */ (document.getElementById('promoInputCode'));
+      var msgEl = document.getElementById('promoFeedbackMsg');
+      var code = (inEl ? inEl.value : '').trim().toUpperCase();
+
+      if (!code) {
+        if (msgEl) {
+          msgEl.innerText = "Kripya valid promo code enter karein.";
+          msgEl.className = "text-[10px] font-semibold text-center text-red-600";
+          msgEl.classList.remove('hidden');
+        }
+        return;
+      }
+
+      var totals = calculateOrderTotals();
+      if (code === 'RAHUL50') {
+        if (totals.subtotal < 200) {
+          if (msgEl) {
+            msgEl.innerText = "RAHUL50 ke liye kam se kam ₹200 ka order hona chahiye.";
+            msgEl.className = "text-[10px] font-semibold text-center text-red-600";
+            msgEl.classList.remove('hidden');
+          }
+          return;
+        }
+      } else if (code === 'DIWALI100') {
+        if (totals.subtotal < 499) {
+          if (msgEl) {
+            msgEl.innerText = "DIWALI100 ke liye kam se kam ₹499 ka order hona chahiye.";
+            msgEl.className = "text-[10px] font-semibold text-center text-red-600";
+            msgEl.classList.remove('hidden');
+          }
+          return;
+        }
+      } else {
+        if (msgEl) {
+          msgEl.innerText = "Invalid Code! Kripya RAHUL50 ya DIWALI100 use karein.";
+          msgEl.className = "text-[10px] font-semibold text-center text-red-600";
+          msgEl.classList.remove('hidden');
+        }
+        return;
+      }
+
+      appliedPromoCode = code;
+      localStorage.setItem('mithilamart_applied_promo', code);
+      if (msgEl) msgEl.classList.add('hidden');
+      renderCart();
+      triggerCelebrationAnimation();
+    };
+
+    window.removeAppliedPromo = function() {
+      appliedPromoCode = null;
+      localStorage.removeItem('mithilamart_applied_promo');
+      var inEl = /** @type {HTMLInputElement} */ (document.getElementById('promoInputCode'));
+      if (inEl) inEl.value = '';
+      var msgEl = document.getElementById('promoFeedbackMsg');
+      if (msgEl) msgEl.classList.add('hidden');
+      renderCart();
+    };
+
+    window.autoSaveUserProfile = function() {
+      var nInp = /** @type {HTMLInputElement} */ (document.getElementById('custName'));
+      var pInp = /** @type {HTMLInputElement} */ (document.getElementById('custPhone'));
+      var aInp = /** @type {HTMLTextAreaElement} */ (document.getElementById('custAddress'));
+      var lInp = /** @type {HTMLInputElement} */ (document.getElementById('custLandmark'));
+
+      customerInfo = {
+        name: nInp ? nInp.value.trim() : '',
+        phone: pInp ? pInp.value.trim() : '',
+        address: aInp ? aInp.value.trim() : '',
+        landmark: lInp ? lInp.value.trim() : '',
+        pincode: APP_CONFIG.selectedPincode,
+        area: APP_CONFIG.selectedArea
+      };
+      localStorage.setItem('mithilamart_user_profile', JSON.stringify(customerInfo));
+      updateLoginHeaderUI();
+    };
+
+    function loadSavedUserProfile() {
+      if (customerInfo && customerInfo.phone) {
+        var nInp = /** @type {HTMLInputElement} */ (document.getElementById('custName'));
+        var pInp = /** @type {HTMLInputElement} */ (document.getElementById('custPhone'));
+        var aInp = /** @type {HTMLTextAreaElement} */ (document.getElementById('custAddress'));
+        var lInp = /** @type {HTMLInputElement} */ (document.getElementById('custLandmark'));
+
+        if (nInp && customerInfo.name) nInp.value = customerInfo.name;
+        if (pInp && customerInfo.phone) pInp.value = customerInfo.phone;
+        if (aInp && customerInfo.address) aInp.value = customerInfo.address;
+        if (lInp && customerInfo.landmark) lInp.value = customerInfo.landmark;
+      }
+      updateLoginHeaderUI();
+    }
+
+    window.openLoginModal = function() {
+      var modal = document.getElementById('loginModal');
+      var nameInp = /** @type {HTMLInputElement} */ (document.getElementById('loginCustName'));
+      var phoneInp = /** @type {HTMLInputElement} */ (document.getElementById('loginCustPhone'));
+      var logoutSec = document.getElementById('userLogoutSection');
+
+      if (customerInfo && customerInfo.phone) {
+        if (nameInp) nameInp.value = customerInfo.name || '';
+        if (phoneInp) phoneInp.value = customerInfo.phone || '';
+        if (logoutSec) logoutSec.classList.remove('hidden');
+      } else {
+        if (logoutSec) logoutSec.classList.add('hidden');
+      }
+      if (modal) modal.classList.remove('hidden');
+    };
+
+    window.closeLoginModal = function() {
+      document.getElementById('loginModal')?.classList.add('hidden');
+    };
+
+    window.saveCustomerLogin = function() {
+      var nInp = /** @type {HTMLInputElement} */ (document.getElementById('loginCustName'));
+      var pInp = /** @type {HTMLInputElement} */ (document.getElementById('loginCustPhone'));
+
+      var phone = pInp ? pInp.value.trim() : '';
+      var name = nInp ? nInp.value.trim() : '';
+
+      if (!/^[6-9]\d{9}$/.test(phone)) {
+        alert('Kripya valid 10-digit mobile number dalein.');
+        return;
+      }
+
+      customerInfo = {
+        name: name || 'Customer',
+        phone: phone,
+        address: customerInfo.address || '',
+        landmark: customerInfo.landmark || '',
+        pincode: APP_CONFIG.selectedPincode,
+        area: APP_CONFIG.selectedArea
+      };
+
+      localStorage.setItem('mithilamart_user_profile', JSON.stringify(customerInfo));
+      updateLoginHeaderUI();
+      loadSavedUserProfile();
+      window.closeLoginModal();
+    };
+
+    window.userLogout = function() {
+      if (confirm('Aap is phone se profile clear karna chahte hain?')) {
+        localStorage.removeItem('mithilamart_user_profile');
+        customerInfo = {};
+        var nInp = /** @type {HTMLInputElement} */ (document.getElementById('custName'));
+        var pInp = /** @type {HTMLInputElement} */ (document.getElementById('custPhone'));
+        var aInp = /** @type {HTMLTextAreaElement} */ (document.getElementById('custAddress'));
+        var lInp = /** @type {HTMLInputElement} */ (document.getElementById('custLandmark'));
+        if (nInp) nInp.value = '';
+        if (pInp) pInp.value = '';
+        if (aInp) aInp.value = '';
+        if (lInp) lInp.value = '';
+        updateLoginHeaderUI();
+        window.closeLoginModal();
+      }
+    };
+
+    function updateLoginHeaderUI() {
+      var badge = document.getElementById('userAuthBadge');
+      if (badge) {
+        if (customerInfo && customerInfo.phone) {
+          var firstName = customerInfo.name ? customerInfo.name.trim().split(' ')[0] : 'Profile';
+          badge.innerText = firstName;
+        } else {
+          badge.innerText = 'Profile';
+        }
+      }
+    }
+
+    function triggerCelebrationAnimation() {
+      try {
+        if (typeof window.confetti === 'function') {
+          window.confetti({
+            particleCount: 80,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#9c1261', '#fbbf24', '#10b981', '#3b82f6', '#f43f5e']
+          });
+        }
+      } catch (e) {}
+    }
+
+    /**
+     * @param {string} text
+     * @returns {any[]}
+     */
+    function parseCSV(text) {
+      var rows = [];
+      var currentRow = [];
+      var currentField = '';
+      var insideQuote = false;
+      for (var i = 0; i < text.length; i++) {
+        var char = text.charAt(i);
+        var nextChar = text.charAt(i + 1);
+        if (char === '"') {
+          if (insideQuote && nextChar === '"') {
+            currentField += '"';
+            i++;
+          } else {
+            insideQuote = !insideQuote;
+          }
+        } else if (char === ',' && !insideQuote) {
+          currentRow.push(currentField.trim());
+          currentField = '';
+        } else if ((char === '\r' || char === '\n') && !insideQuote) {
+          if (char === '\r' && nextChar === '\n') i++;
+          currentRow.push(currentField.trim());
+          if (currentRow.length > 0) rows.push(currentRow);
+          currentRow = [];
+          currentField = '';
+        } else {
+          currentField += char;
+        }
+      }
+      if (currentField.length > 0 || currentRow.length > 0) {
+        currentRow.push(currentField.trim());
+        rows.push(currentRow);
+      }
+      return rows;
+    }
+
+    function loadProductsFromGoogleSheet() {
+      fetch(GOOGLE_SHEET_CSV_URL + '&_t=' + Date.now())
+        /** @param {any} res */
+        .then(function(res) { return res.text(); })
+        /** @param {string} text */
+        .then(function(text) {
+          var parsedRows = parseCSV(text);
+          if (parsedRows.length > 1) {
+            var fetchedItems = [];
+            for (var i = 1; i < parsedRows.length; i++) {
+              var cols = parsedRows[i];
+              if (cols.length >= 6 && cols[1] && Number(cols[3])) {
+                var sellPrice = Math.max(1, Number(cols[3]) || 99);
+                var marketPrice = Math.max(sellPrice, Number(cols[4]) || sellPrice * 2);
+
+                var rawImages = (cols[5] || '').split(',');
+                var cleanImages = [];
+                for (var imgIdx = 0; imgIdx < rawImages.length; imgIdx++) {
+                  var trimmed = rawImages[imgIdx].trim();
+                  if (trimmed) cleanImages.push(trimmed);
+                }
+                if (cleanImages.length === 0) cleanImages.push('https://placehold.co/400x300/9c1261/ffffff?text=MithilaMart');
+
+                fetchedItems.push({
+                  id: cols[0] || ('p-sheet-' + i),
+                  name: cols[1],
+                  category: cols[2] || 'Traditional earthen diyas',
+                  price: sellPrice,
+                  mrp: marketPrice,
+                  images: cleanImages,
+                  image: cleanImages[0],
+                  badge: cols[6] || 'Popular Pick',
+                  rating: 4.9,
+                  reviewsCount: 38,
+                  description: 'Authentic quality verified for distribution across Supaul.',
+                  reviews: [
+                    { name: 'S. Sah (Supaul Sadar)', rating: 5, comment: 'Packaging mast thi aur items genuine hain. Same day deliver ho gaya!' },
+                    { name: 'R. Choudhary (Ward 1)', rating: 5, comment: 'Bina kisi jhanjhat ke order place hua. Supaul me best rate hai.' }
+                  ]
+                });
+              }
+            }
+            if (fetchedItems.length > 0) {
+              PRODUCTS = fetchedItems;
+              localStorage.setItem('mithilamart_products_cache', JSON.stringify(PRODUCTS));
+            }
+          }
+          renderTrendingSlider();
+          renderProducts();
+        })
+        .catch(function() {
+          var cached = localStorage.getItem('mithilamart_products_cache');
+          if (cached) {
+            PRODUCTS = JSON.parse(cached);
+            renderTrendingSlider();
+            renderProducts();
+          }
+        });
+    }
+
+    function renderTrendingSlider() {
+      var track = document.getElementById('trendingSliderContainer');
+      if (!track) return;
+      if (PRODUCTS.length === 0) {
+        track.innerHTML = '<div class="py-4 text-xs text-slate-400">Loading festival deals...</div>';
+        return;
+      }
+
+      var html = '';
+      for (var i = 0; i < PRODUCTS.length; i++) {
+        var p = PRODUCTS[i];
+        var disc = Math.round(((p.mrp - p.price) / p.mrp) * 100);
+        html += '<div class="trending-card min-w-[155px] max-w-[155px] bg-white border border-slate-200 rounded-xl p-2 shadow-sm shrink-0 snap-center flex flex-col justify-between hover:shadow transition">' +
+          '<div class="relative cursor-pointer" onclick="window.openProductDetailModal(\'' + p.id + '\')">' +
+          '<img src="' + p.image + '" alt="' + p.name + '" class="w-full h-24 object-cover rounded-lg" />' +
+          '<span class="absolute top-1 left-1 bg-red-600 text-white font-black text-[8px] px-1.5 py-0.5 rounded shadow">' + disc + '% OFF</span></div>' +
+          '<div class="mt-1.5 flex flex-col justify-between flex-1">' +
+          '<h5 onclick="window.openProductDetailModal(\'' + p.id + '\')" class="cursor-pointer font-bold text-slate-900 text-[11px] line-clamp-1 leading-tight">' + p.name + '</h5>' +
+          '<div class="flex items-baseline gap-1 mt-1">' +
+          '<span class="font-black text-slate-900 text-xs">₹' + p.price + '</span>' +
+          '<span class="text-[9px] text-slate-400 line-through">₹' + p.mrp + '</span></div>' +
+          '<button onclick="window.addToCart(\'' + p.id + '\')" class="w-full mt-2 bg-[#9c1261] hover:bg-[#850f52] text-white py-1 rounded text-[10px] font-bold shadow-sm flex items-center justify-center gap-1 active:scale-95 transition">' +
+          '<i class="fa-solid fa-plus text-[8px]"></i> Add</button></div></div>';
+      }
+      track.innerHTML = html;
+
+      clearInterval(autoSlideInterval);
+      autoSlideInterval = setInterval(function() {
+        if (!track) return;
+        var maxScroll = track.scrollWidth - track.clientWidth;
+        if (track.scrollLeft >= maxScroll - 5) {
+          track.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          track.scrollBy({ left: 165, behavior: 'smooth' });
+        }
+      }, 3500);
+    }
+
+    function calculateOrderTotals() {
+      var subtotal = 0;
+      for (var i = 0; i < cart.length; i++) {
+        subtotal += Math.max(1, cart[i].price) * Math.max(1, cart[i].quantity);
+      }
+      if (subtotal === 0) return { subtotal: 0, discount: 0, deliveryFee: 0, codFee: 0, finalAmount: 0 };
+      
+      var discount = evaluatePromoDiscount(subtotal);
+      var effectiveSubtotal = Math.max(0, subtotal - discount);
+      var deliveryFee = subtotal >= APP_CONFIG.freeDeliveryLimit ? 0 : APP_CONFIG.standardDeliveryFee;
+      var codFee = (selectedPaymentMode === 'COD' && subtotal < 99) ? APP_CONFIG.codFeeBelow99 : 0;
+      return { 
+        subtotal: subtotal, 
+        discount: discount, 
+        deliveryFee: deliveryFee, 
+        codFee: codFee, 
+        finalAmount: Math.max(0, effectiveSubtotal + deliveryFee + codFee) 
+      };
+    }
+
+    function updateCartBadge() {
+      var totalCount = 0;
+      for (var i = 0; i < cart.length; i++) totalCount += cart[i].quantity;
+      var totals = calculateOrderTotals();
+      var badge = document.getElementById('cartCountBadge');
+      var dot = document.getElementById('navCartDot');
+      if (totalCount > 0) {
+        if (badge) { badge.innerText = String(totalCount); badge.classList.remove('hidden'); }
+        if (dot) dot.classList.remove('hidden');
+      } else {
+        if (badge) badge.classList.add('hidden');
+        if (dot) dot.classList.add('hidden');
+      }
+      var remaining = APP_CONFIG.freeDeliveryLimit - totals.subtotal;
+      var statusText = document.getElementById('freeDeliveryStatusText');
+      var ratio = document.getElementById('freeDeliveryAmountRatio');
+      if (totals.subtotal === 0) {
+        if (statusText) statusText.innerText = "Add ₹199 for FREE DELIVERY";
+        if (ratio) ratio.innerText = "₹0 / ₹199";
+      } else if (remaining > 0) {
+        if (statusText) statusText.innerHTML = "Add <strong>₹" + remaining + "</strong> for FREE DELIVERY!";
+        if (ratio) ratio.innerText = "₹" + totals.subtotal + " / ₹199";
+      } else {
+        if (statusText) statusText.innerHTML = "🎉 <strong>FREE DELIVERY Unlocked!</strong>";
+        if (ratio) ratio.innerText = "₹" + totals.subtotal + " (FREE)";
+      }
+    }
+
+    function renderCart() {
+      var listContainer = document.getElementById('cartItemList');
+      var title = document.getElementById('cartCountTitle');
+      var totals = calculateOrderTotals();
+      var totalQty = 0;
+      for (var i = 0; i < cart.length; i++) totalQty += cart[i].quantity;
+      if (title) title.innerText = String(totalQty);
+      if (!listContainer) return;
+
+      if (cart.length === 0) {
+        listContainer.innerHTML = '<div class="py-10 text-center text-slate-400 text-xs">Aapka cart khali hai. Kuch shandar products jodiye!</div>';
+        document.getElementById('cartCalculationBox')?.classList.add('hidden');
+        document.getElementById('promoSectionBox')?.classList.add('hidden');
+        document.getElementById('proceedToAddressBtn')?.classList.add('hidden');
+        return;
+      }
+      document.getElementById('cartCalculationBox')?.classList.remove('hidden');
+      document.getElementById('promoSectionBox')?.classList.remove('hidden');
+      document.getElementById('proceedToAddressBtn')?.classList.remove('hidden');
+
+      var html = '';
+      for (var j = 0; j < cart.length; j++) {
+        var item = cart[j];
+        html += '<div class="py-2.5 flex items-center justify-between gap-2">' +
+          '<div class="flex-1"><h5 class="font-bold text-xs text-slate-900 line-clamp-1">' + item.name + '</h5>' +
+          '<span class="text-xs font-black text-slate-800">₹' + item.price + '</span></div>' +
+          '<div class="flex items-center border border-slate-300 rounded-lg overflow-hidden">' +
+          '<button onclick="window.updateQty(\'' + item.id + '\', -1)" class="px-2.5 py-0.5 bg-slate-100 font-bold active:bg-slate-200">-</button>' +
+          '<span class="px-2 text-xs font-bold">' + item.quantity + '</span>' +
+          '<button onclick="window.updateQty(\'' + item.id + '\', 1)" class="px-2.5 py-0.5 bg-slate-100 font-bold active:bg-slate-200">+</button></div>' +
+          '<div class="text-right text-xs font-bold text-slate-900 w-14">₹' + (item.price * item.quantity) + '</div></div>';
+      }
+      listContainer.innerHTML = html;
+
+      var appliedPromoBox = document.getElementById('appliedPromoStatus');
+      var appliedPromoText = document.getElementById('appliedPromoText');
+      var discountRow = document.getElementById('billDiscountRow');
+      var discountAmount = document.getElementById('billDiscountAmount');
+
+      if (totals.discount > 0 && appliedPromoCode) {
+        if (appliedPromoBox) appliedPromoBox.classList.remove('hidden');
+        if (appliedPromoText) appliedPromoText.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600"></i> ' + appliedPromoCode + ' Applied (-₹' + totals.discount + ')';
+        if (discountRow) discountRow.classList.remove('hidden');
+        if (discountAmount) discountAmount.innerText = '-₹' + totals.discount;
+      } else {
+        if (appliedPromoBox) appliedPromoBox.classList.add('hidden');
+        if (discountRow) discountRow.classList.add('hidden');
+      }
+
+      var subEl = document.getElementById('billSubtotal');
+      if (subEl) subEl.innerText = '₹' + totals.subtotal;
+      var delEl = document.getElementById('billDeliveryFee');
+      if (delEl) {
+        delEl.innerText = totals.deliveryFee === 0 ? 'FREE' : '₹' + totals.deliveryFee;
+        delEl.className = totals.deliveryFee === 0 ? 'font-bold text-emerald-600' : 'font-bold text-slate-700';
+      }
+      var codEl = document.getElementById('billCodFee');
+      if (codEl) codEl.innerText = '₹' + totals.codFee;
+      var finEl = document.getElementById('billFinalAmount');
+      if (finEl) finEl.innerText = '₹' + totals.finalAmount;
+    }
+
+    function renderProducts() {
+      var grid = document.getElementById('productGrid');
+      if (!grid) return;
+      var searchInp = /** @type {HTMLInputElement} */ (document.getElementById('searchInput'));
+      var searchVal = (searchInp ? searchInp.value : '').trim().toLowerCase();
+      var filtered = [];
+      for (var i = 0; i < PRODUCTS.length; i++) {
+        var p = PRODUCTS[i];
+        var matchCat = selectedCategory === 'All' || p.category === selectedCategory;
+        var matchSearch = !searchVal || p.name.toLowerCase().indexOf(searchVal) !== -1 || p.category.toLowerCase().indexOf(searchVal) !== -1;
+        if (matchCat && matchSearch) filtered.push(p);
+      }
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div class="col-span-2 py-10 text-center text-slate-400 text-xs">Koi product nahi mila.</div>';
+        return;
+      }
+      var html = '';
+      for (var k = 0; k < filtered.length; k++) {
+        var prod = filtered[k];
+        var disc = Math.round(((prod.mrp - prod.price) / prod.mrp) * 100);
+        var inWish = wishlist.indexOf(prod.id) !== -1;
+        var photosCount = (prod.images && prod.images.length > 1) ? prod.images.length : null;
+
+        html += '<div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm flex flex-col justify-between hover:shadow-md transition">' +
+          '<div class="relative cursor-pointer" onclick="window.openProductDetailModal(\'' + prod.id + '\')">' +
+          '<img src="' + prod.image + '" alt="' + prod.name + '" class="w-full h-36 object-cover" />' +
+          '<span class="absolute top-1.5 left-1.5 bg-[#9c1261] text-white text-[9px] font-black px-1.5 py-0.5 rounded shadow">' + disc + '% OFF</span>' +
+          (photosCount ? '<span class="absolute bottom-1.5 right-1.5 bg-black/70 text-white text-[8px] font-bold px-1.5 py-0.5 rounded flex items-center gap-0.5"><i class="fa-solid fa-camera"></i> ' + photosCount + '</span>' : '') +
+          '<button onclick="event.stopPropagation(); window.toggleWishlist(\'' + prod.id + '\');" class="absolute top-1.5 right-1.5 bg-white/90 p-1.5 rounded-full shadow text-xs ' + (inWish ? 'text-red-500' : 'text-slate-400') + '">' +
+          '<i class="fa-' + (inWish ? 'solid' : 'regular') + ' fa-heart"></i></button></div>' +
+          '<div class="p-2 flex flex-col flex-1 justify-between">' +
+          '<div class="cursor-pointer" onclick="window.openProductDetailModal(\'' + prod.id + '\')">' +
+          '<div class="flex items-center justify-between"><span class="text-[9px] text-slate-400 font-semibold uppercase">' + prod.badge + '</span>' +
+          '<span class="text-[10px] text-emerald-700 font-bold flex items-center gap-0.5">' + prod.rating + ' <i class="fa-solid fa-star text-[8px]"></i></span></div>' +
+          '<h4 class="font-bold text-xs text-slate-900 line-clamp-2 mt-0.5 leading-snug">' + prod.name + '</h4></div>' +
+          '<div class="mt-2 pt-1.5 border-t border-slate-100">' +
+          '<div class="flex items-baseline justify-between mb-1.5"><div><span class="font-black text-slate-900 text-sm">₹' + prod.price + '</span>' +
+          '<span class="text-[10px] text-slate-400 line-through ml-1">₹' + prod.mrp + '</span></div></div>' +
+          '<div class="grid grid-cols-2 gap-1">' +
+          '<button onclick="window.orderItemOnWhatsAppById(\'' + prod.id + '\')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-1 px-1 rounded flex items-center justify-center gap-1 shadow-sm active:scale-95 transition"><i class="fa-brands fa-whatsapp text-xs"></i> <span>Order</span></button>' +
+          '<button onclick="window.addToCart(\'' + prod.id + '\')" class="bg-pink-50 hover:bg-[#9c1261] text-[#9c1261] hover:text-white border border-[#9c1261] font-bold text-[10px] py-1 px-1 rounded transition text-center active:scale-95">Add +</button>' +
+          '</div></div></div></div>';
+      }
+      grid.innerHTML = html;
+    }
+
+    /**
+     * @param {string} id
+     * @param {number} delta
+     */
+    window.updateQty = function(id, delta) {
+      for (var i = 0; i < cart.length; i++) {
+        if (cart[i].id === id) {
+          cart[i].quantity += delta;
+          if (cart[i].quantity <= 0) cart.splice(i, 1);
+          break;
+        }
+      }
+      saveCartState();
+    };
+
+    /**
+     * @param {string} productId
+     */
+    window.addToCart = function(productId) {
+      var item = null;
+      for (var i = 0; i < PRODUCTS.length; i++) {
+        if (PRODUCTS[i].id === productId) { item = PRODUCTS[i]; break; }
+      }
+      if (!item) return;
+      var existing = null;
+      for (var j = 0; j < cart.length; j++) {
+        if (cart[j].id === productId) { existing = cart[j]; break; }
+      }
+      if (existing) {
+        existing.quantity += 1;
+      } else {
+        cart.push({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          mrp: item.mrp,
+          image: item.image,
+          quantity: 1
+        });
+      }
+      playAddToCartFeedback();
+      saveCartState();
+    };
+
+    /**
+     * @param {string} id
+     */
+    window.toggleWishlist = function(id) {
+      var idx = wishlist.indexOf(id);
+      if (idx !== -1) wishlist.splice(idx, 1);
+      else wishlist.push(id);
+      saveWishlistState();
+      var badge = document.getElementById('wishlistCountBadge');
+      if (badge) {
+        badge.innerText = String(wishlist.length);
+        badge.classList.toggle('hidden', wishlist.length === 0);
+      }
+      renderProducts();
+      renderWishlist();
+    };
+
+    function renderWishlist() {
+      var grid = document.getElementById('wishlistGrid');
+      if (!grid) return;
+      var items = [];
+      for (var i = 0; i < PRODUCTS.length; i++) {
+        if (wishlist.indexOf(PRODUCTS[i].id) !== -1) items.push(PRODUCTS[i]);
+      }
+      if (items.length === 0) {
+        grid.innerHTML = '<div class="col-span-2 py-10 text-center text-slate-400 text-xs">Wishlist khali hai.</div>';
+        return;
+      }
+      var html = '';
+      for (var j = 0; j < items.length; j++) {
+        var p = items[j];
+        html += '<div class="bg-white rounded-xl border border-slate-200 p-2 text-xs flex flex-col justify-between">' +
+          '<img src="' + p.image + '" class="w-full h-28 object-cover rounded-lg cursor-pointer" onclick="window.openProductDetailModal(\'' + p.id + '\')" />' +
+          '<h5 class="font-bold text-slate-900 line-clamp-1 mt-1.5">' + p.name + '</h5>' +
+          '<span class="font-black text-slate-900 mt-0.5">₹' + p.price + '</span>' +
+          '<div class="grid grid-cols-2 gap-1 mt-2">' +
+          '<button onclick="window.orderItemOnWhatsAppById(\'' + p.id + '\')" class="bg-emerald-600 text-white py-1 rounded font-bold text-[10px] flex items-center justify-center gap-1"><i class="fa-brands fa-whatsapp"></i> WA</button>' +
+          '<button onclick="window.addToCart(\'' + p.id + '\'); window.toggleWishlist(\'' + p.id + '\');" class="bg-[#9c1261] text-white py-1 rounded font-bold text-[10px]">+ Cart</button>' +
+          '</div></div>';
+      }
+      grid.innerHTML = html;
+    }
+
+    function renderMyRecentOrders() {
+      var sec = document.getElementById('myRecentOrdersSection');
+      var list = document.getElementById('myRecentOrdersList');
+      if (!sec || !list) return;
+
+      if (!myOrdersHistory || myOrdersHistory.length === 0) {
+        sec.classList.add('hidden');
+        return;
+      }
+
+      sec.classList.remove('hidden');
+      var html = '';
+      for (var i = 0; i < myOrdersHistory.length; i++) {
+        var ord = myOrdersHistory[i];
+        html += '<div onclick="window.openTrackWithId(\'' + ord.orderId + '\')" class="bg-white border border-slate-200 rounded-xl p-3 shadow-sm flex items-center justify-between cursor-pointer hover:border-[#9c1261] transition">' +
+          '<div><div class="flex items-center gap-1.5"><span class="font-bold text-xs text-slate-900">' + ord.orderId + '</span>' +
+          '<span class="text-[9px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded">' + (ord.status || 'Active') + '</span></div>' +
+          '<p class="text-[10px] text-slate-500 mt-0.5">₹' + ord.finalAmount + ' • ' + (ord.date || '') + '</p></div>' +
+          '<span class="text-xs font-bold text-[#9c1261] flex items-center gap-1">Track <i class="fa-solid fa-chevron-right text-[9px]"></i></span></div>';
+      }
+      list.innerHTML = html;
+    }
+
+    window.goToAddressStep = function() {
+      if (cart.length === 0) return;
+      loadSavedUserProfile();
+      document.getElementById('cartItemsView')?.classList.add('hidden');
+      document.getElementById('addressStepView')?.classList.remove('hidden');
+    };
+    window.backToCartView = function() {
+      document.getElementById('addressStepView')?.classList.add('hidden');
+      document.getElementById('cartItemsView')?.classList.remove('hidden');
+    };
+    window.backToAddressView = function() {
+      document.getElementById('paymentStepView')?.classList.add('hidden');
+      document.getElementById('addressStepView')?.classList.remove('hidden');
+    };
+
+    /**
+     * @param {string} mode
+     */
+    window.togglePaymentSelection = function(mode) {
+      selectedPaymentMode = mode;
+      renderPaymentStep();
+    };
+
+    function renderPaymentStep() {
+      var totals = calculateOrderTotals();
+      var pSub = document.getElementById('paySubtotal');
+      if (pSub) pSub.innerText = '₹' + totals.subtotal;
+
+      var payDiscRow = document.getElementById('payDiscountRow');
+      var payDiscAmount = document.getElementById('payDiscountAmount');
+      if (totals.discount > 0 && appliedPromoCode) {
+        if (payDiscRow) payDiscRow.classList.remove('hidden');
+        if (payDiscAmount) payDiscAmount.innerText = '-₹' + totals.discount + ' (' + appliedPromoCode + ')';
+      } else {
+        if (payDiscRow) payDiscRow.classList.add('hidden');
+      }
+
+      var pDel = document.getElementById('payDelivery');
+      if (pDel) pDel.innerText = totals.deliveryFee === 0 ? 'FREE' : '₹' + totals.deliveryFee;
+      var pCod = document.getElementById('payCodFee');
+      if (pCod) pCod.innerText = '₹' + totals.codFee;
+      var pFin = document.getElementById('payFinalTotal');
+      if (pFin) pFin.innerText = '₹' + totals.finalAmount;
+      var codBadge = document.getElementById('codBadgeText');
+      if (codBadge) codBadge.innerText = totals.subtotal < 99 ? '+₹19 Fee' : 'FREE COD';
+      var payBtn = document.getElementById('finalPayBtn');
+      if (payBtn) {
+        if (selectedPaymentMode === 'ONLINE') {
+          payBtn.innerHTML = '<i class="fa-solid fa-qrcode"></i> <span>Pay via Merchant QR (₹' + totals.finalAmount + ')</span>';
+          payBtn.className = "w-full mt-3 bg-[#002e6e] text-white py-2.5 rounded-lg font-bold text-xs shadow flex items-center justify-center gap-1.5";
+        } else {
+          payBtn.innerHTML = '<i class="fa-solid fa-truck-fast"></i> <span>Confirm Cash on Delivery Order (₹' + totals.finalAmount + ')</span>';
+          payBtn.className = "w-full mt-3 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold text-xs shadow flex items-center justify-center gap-1.5";
+        }
+      }
+    }
+
+    window.executeOrderFlow = function() {
+      var totals = calculateOrderTotals();
+      if (totals.finalAmount <= 0 || cart.length === 0) {
+        alert('Cart khali hai.');
+        return;
+      }
+      if (selectedPaymentMode === 'ONLINE') openUpiModal(totals.finalAmount);
+      else processOrderSubmission('COD', null, totals.finalAmount);
+    };
+
+    /**
+     * @param {number} amount
+     */
+    function openUpiModal(amount) {
+      var upiUrl = 'upi://pay?pa=' + APP_CONFIG.upiId + '&pn=' + encodeURIComponent(APP_CONFIG.merchantName) + '&am=' + amount + '&cu=INR';
+      var qrApiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=' + encodeURIComponent(upiUrl);
+      var qrImg = /** @type {HTMLImageElement} */ (document.getElementById('dynamicQrCodeImg'));
+      if (qrImg) qrImg.src = qrApiUrl;
+      var qrText = document.getElementById('qrPayableAmountText');
+      if (qrText) qrText.innerText = 'Pay Exact: ₹' + amount;
+      var directBtn = /** @type {HTMLAnchorElement} */ (document.getElementById('directUpiAppBtn'));
+      if (directBtn) directBtn.href = upiUrl;
+      var utrInp = /** @type {HTMLInputElement} */ (document.getElementById('upiUtrInput'));
+      if (utrInp) utrInp.value = '';
+      document.getElementById('utrErrorMsg')?.classList.add('hidden');
+      document.getElementById('upiPaymentModal')?.classList.remove('hidden');
+    }
+
+    window.closeUpiModal = function() {
+      document.getElementById('upiPaymentModal')?.classList.add('hidden');
+    };
+
+    window.submitUpiOrderForVerification = function() {
+      var utrInp = /** @type {HTMLInputElement} */ (document.getElementById('upiUtrInput'));
+      var utr = (utrInp ? utrInp.value : '').trim();
+      if (!/^[0-9]{12}$/.test(utr)) {
+        document.getElementById('utrErrorMsg')?.classList.remove('hidden');
+        return;
+      }
+      window.closeUpiModal();
+      var totals = calculateOrderTotals();
+      processOrderSubmission('ONLINE_PENDING_AUDIT', utr, totals.finalAmount);
+    };
+
+    /**
+     * @param {string} method
+     * @param {any} utr
+     * @param {number} finalAmount
+     */
+    function processOrderSubmission(method, utr, finalAmount) {
+      var errBox = document.getElementById('orderSyncErrorMsg');
+      var payBtn = /** @type {HTMLButtonElement} */ (document.getElementById('finalPayBtn'));
+      if (errBox) errBox.classList.add('hidden');
+      if (payBtn) {
+        payBtn.disabled = true;
+        payBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Order safe kar rahe hain...';
+      }
+      var randomSegment = Math.floor(100000 + Math.random() * 900000);
+      var orderId = 'MM-' + randomSegment;
+      var itemsList = [];
+      for (var i = 0; i < cart.length; i++) itemsList.push(cart[i].quantity + 'x ' + cart[i].name);
+      var itemsSummary = itemsList.join(' | ');
+
+      var payload = {
+        orderId: orderId,
+        customerName: customerInfo.name,
+        phone: customerInfo.phone,
+        address: customerInfo.address,
+        area: customerInfo.area,
+        pincode: customerInfo.pincode,
+        landmark: customerInfo.landmark,
+        items: itemsSummary + (appliedPromoCode ? ' [Promo: ' + appliedPromoCode + ']' : ''),
+        amount: finalAmount,
+        paymentMethod: method,
+        utr: utr || 'N/A'
+      };
+
+      fetch(ORDER_WEBHOOK_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).then(function() {
+        var recordedOrder = {
+          orderId: orderId,
+          customer: customerInfo,
+          items: cart.slice(0),
+          method: method,
+          utr: utr,
+          coupon: appliedPromoCode,
+          finalAmount: finalAmount,
+          date: new Date().toLocaleDateString('en-IN'),
+          status: 'Order Placed'
+        };
+        latestOrder = recordedOrder;
+        
+        myOrdersHistory.unshift(recordedOrder);
+        saveOrdersHistoryState();
+
+        triggerCelebrationAnimation();
+        cart = [];
+        saveCartState();
+
+        document.getElementById('paymentStepView')?.classList.add('hidden');
+        document.getElementById('orderSuccessView')?.classList.remove('hidden');
+        document.getElementById('successOrderId').innerText = orderId;
+        document.getElementById('successCustName').innerText = customerInfo.name;
+        document.getElementById('successCustPhone').innerText = customerInfo.phone;
+        document.getElementById('successAmount').innerText = '₹' + finalAmount;
+        document.getElementById('successOrderStatus').innerText = 'Order Placed';
+
+        if (appliedPromoCode) {
+          document.getElementById('successCouponRow')?.classList.remove('hidden');
+          document.getElementById('successCouponVal').innerText = appliedPromoCode;
+        } else {
+          document.getElementById('successCouponRow')?.classList.add('hidden');
+        }
+
+        var paymentLabel = document.getElementById('successPaymentType');
+        if (method === 'ONLINE_PENDING_AUDIT') {
+          paymentLabel.innerText = 'Under Review (Verification Pending)';
+          paymentLabel.className = 'font-bold text-amber-600';
+        } else {
+          paymentLabel.innerText = 'Cash on Delivery (Pending)';
+          paymentLabel.className = 'font-bold text-slate-800';
+        }
+        if (utr) {
+          document.getElementById('successUtrRow')?.classList.remove('hidden');
+          document.getElementById('successUtrVal').innerText = utr;
+        } else {
+          document.getElementById('successUtrRow')?.classList.add('hidden');
+        }
+      }).catch(function() {
+        if (errBox) {
+          errBox.innerText = 'Store registry tak connect nahi ho paya. Please retry karein.';
+          errBox.classList.remove('hidden');
+        }
+      }).finally(function() {
+        if (payBtn) {
+          payBtn.disabled = false;
+          renderPaymentStep();
+        }
+      });
+    }
+
+    window.executeOrderTracking = function() {
+      var qInp = /** @type {HTMLInputElement} */ (document.getElementById('trackSearchQuery'));
+      var q = (qInp ? qInp.value : '').trim().toLowerCase();
+      var resBox = document.getElementById('trackingResultBox');
+      if (!resBox) return;
+      if (!q) {
+        alert('Kripya phone number ya Order ID dalein.');
+        return;
+      }
+      resBox.innerHTML = '<div class="py-6 text-center text-slate-500 text-xs"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Order live status check ho raha hai...</div>';
+      fetch(GOOGLE_SHEET_ORDERS_CSV_URL + '&_bust=' + Date.now())
+        /** @param {any} res */
+        .then(function(res) { return res.text(); })
+        /** @param {string} text */
+        .then(function(text) {
+          var parsedRows = parseCSV(text);
+          var matchedOrders = [];
+          if (parsedRows.length > 1) {
+            for (var i = 1; i < parsedRows.length; i++) {
+              var cols = parsedRows[i];
+              var ordId = (cols[1] || '').toLowerCase();
+              var ph = (cols[3] || '').replace(/[^0-9]/g, '');
+              if (ordId.indexOf(q) !== -1 || (q.length >= 6 && ph.indexOf(q) !== -1)) {
+                matchedOrders.push({
+                  time: cols[0],
+                  id: cols[1],
+                  name: cols[2],
+                  phone: cols[3],
+                  address: cols[4],
+                  items: cols[5],
+                  amount: cols[6],
+                  method: cols[7],
+                  utr: cols[8],
+                  status: cols[9] || 'Order Placed'
+                });
+              }
+            }
+          }
+          if (matchedOrders.length === 0) {
+            resBox.innerHTML = '<div class="bg-white border rounded-xl p-4 text-center text-xs">' +
+              '<i class="fa-solid fa-circle-exclamation text-amber-500 text-xl mb-1"></i>' +
+              '<p class="font-bold text-slate-800">Koi order record nahi mila.</p>' +
+              '<p class="text-[11px] text-slate-500 mt-0.5">Kripya sahi 10-digit mobile number ya Order ID check karein.</p></div>';
+            return;
+          }
+          var rev = matchedOrders.reverse();
+          var outHtml = '';
+          for (var k = 0; k < rev.length; k++) {
+            var o = rev[k];
+            var st = (o.status || '').toLowerCase();
+            var step2 = st.indexOf('pack') !== -1 || st.indexOf('dispatch') !== -1 || st.indexOf('out') !== -1 || st.indexOf('deliver') !== -1;
+            var step3 = st.indexOf('out') !== -1 || st.indexOf('deliver') !== -1;
+            var step4 = st.indexOf('deliver') !== -1;
+            var width = step4 ? '100%' : (step3 ? '66%' : (step2 ? '33%' : '0%'));
+
+            outHtml += '<div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm text-xs space-y-3">' +
+              '<div class="flex items-center justify-between border-b pb-2"><div><span class="font-black text-slate-900">' + o.id + '</span><p class="text-[10px] text-slate-400">' + o.time + '</p></div>' +
+              '<span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">' + o.status + '</span></div>' +
+              '<div class="py-2 px-1"><div class="relative flex items-center justify-between">' +
+              '<div class="absolute top-1/2 left-0 right-0 h-1 bg-slate-200 -translate-y-1/2 z-0"></div>' +
+              '<div class="absolute top-1/2 left-0 h-1 bg-emerald-500 -translate-y-1/2 z-0 transition-all duration-500" style="width:' + width + '"></div>' +
+              '<div class="relative z-10 flex flex-col items-center"><div class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] shadow">✓</div><span class="text-[9px] font-bold text-slate-800 mt-1">Confirmed</span></div>' +
+              '<div class="relative z-10 flex flex-col items-center"><div class="w-6 h-6 rounded-full ' + (step2 ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-500') + ' flex items-center justify-center text-[10px] shadow">' + (step2 ? '✓' : '2') + '</div><span class="text-[9px] font-bold ' + (step2 ? 'text-slate-800' : 'text-slate-400') + ' mt-1">Packed</span></div>' +
+              '<div class="relative z-10 flex flex-col items-center"><div class="w-6 h-6 rounded-full ' + (step3 ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-500') + ' flex items-center justify-center text-[10px] shadow"><i class="fa-solid fa-truck text-[9px]"></i></div><span class="text-[9px] font-bold ' + (step3 ? 'text-slate-800' : 'text-slate-400') + ' mt-1">Dispatched</span></div>' +
+              '<div class="relative z-10 flex flex-col items-center"><div class="w-6 h-6 rounded-full ' + (step4 ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-500') + ' flex items-center justify-center text-[10px] shadow"><i class="fa-solid fa-house-chimney text-[9px]"></i></div><span class="text-[9px] font-bold ' + (step4 ? 'text-slate-800' : 'text-slate-400') + ' mt-1">Delivered</span></div>' +
+              '</div></div>' +
+              '<div class="bg-slate-50 border rounded-lg p-2.5 text-[11px] space-y-1 text-slate-700">' +
+              '<p><strong>Customer:</strong> ' + o.name + ' (' + o.phone + ')</p><p><strong>Destination:</strong> ' + o.address + '</p>' +
+              '<p><strong>Items:</strong> ' + o.items + '</p><p><strong>Total:</strong> <span class="font-bold text-[#9c1261]">₹' + o.amount + '</span> (' + o.method + ')</p></div>' +
+              '<a href="https://wa.me/917484005743?text=Namaste%20Rahul%20ji,%20Order%20ID%20' + o.id + '%20status%20query" target="_blank" class="w-full bg-emerald-50 text-emerald-800 border border-emerald-300 font-bold py-1.5 rounded-lg flex items-center justify-center gap-1.5 text-[11px]">' +
+              '<i class="fa-brands fa-whatsapp text-sm text-emerald-600"></i> Contact Supaul Delivery Hub</a></div>';
+          }
+          resBox.innerHTML = outHtml;
+        })
+        .catch(function() {
+          resBox.innerHTML = '<div class="py-6 text-center text-red-500 text-xs">Registry temporarily unreachable. Please retry shortly.</div>';
+        });
+    };
+
+    /**
+     * @param {string} orderId
+     */
+    window.openTrackWithId = function(orderId) {
+      window.switchTab('track');
+      var input = /** @type {HTMLInputElement} */ (document.getElementById('trackSearchQuery'));
+      if (input) input.value = orderId;
+      window.executeOrderTracking();
+    };
+
+    window.sendOrderReceiptToWhatsapp = function() {
+      if (!latestOrder) return;
+      var itemsTextArr = [];
+      for (var i = 0; i < latestOrder.items.length; i++) {
+        var it = latestOrder.items[i];
+        itemsTextArr.push('• ' + it.quantity + 'x ' + it.name + ' (₹' + (it.price * it.quantity) + ')');
+      }
+      var text = '*MITHILAMART ORDER CONFIRMATION*%0A%0A' +
+        '*Order ID:* ' + latestOrder.orderId + '%0A' +
+        '*Customer:* ' + latestOrder.customer.name + '%0A' +
+        '*Phone:* ' + latestOrder.customer.phone + '%0A' +
+        '*Address:* ' + latestOrder.customer.address + ', ' + latestOrder.customer.area + ' (' + latestOrder.customer.pincode + ')%0A' +
+        '*Payment Method:* ' + latestOrder.method + ' ' + (latestOrder.utr ? '(UTR: ' + latestOrder.utr + ')' : '') + '%0A' +
+        (latestOrder.coupon ? '*Promo Code Applied:* ' + latestOrder.coupon + '%0A' : '') +
+        '*Total Payable:* ₹' + latestOrder.finalAmount + '%0A%0A' +
+        '*Items:*%0A' + itemsTextArr.join('%0A') + '%0A%0A' +
+        'Kindly dispatch parcel according to Supaul hub schedule.';
+      window.open('https://wa.me/' + APP_CONFIG.rawPhone + '?text=' + text, '_blank');
+    };
+
+    /**
+     * @param {string} productId
+     */
+    window.orderItemOnWhatsAppById = function(productId) {
+      var item = null;
+      for (var i = 0; i < PRODUCTS.length; i++) {
+        if (PRODUCTS[i].id === productId) { item = PRODUCTS[i]; break; }
+      }
+      if (!item) return;
+      var msg = '*MITHILAMART STORE ORDER INQUIRY*%0A%0A' +
+        '📦 *Product:* ' + encodeURIComponent(item.name) + '%0A' +
+        '💰 *Price:* ₹' + item.price + '%0A' +
+        '📍 *Destination:* Supaul, Bihar%0A%0A' +
+        'Please confirm stock availability and dispatch schedule.';
+      window.open('https://wa.me/' + APP_CONFIG.rawPhone + '?text=' + msg, '_blank');
+    };
+
+    /**
+     * @param {string} productId
+     */
+    window.openProductDetailModal = function(productId) {
+      var p = null;
+      for (var i = 0; i < PRODUCTS.length; i++) {
+        if (PRODUCTS[i].id === productId) { p = PRODUCTS[i]; break; }
+      }
+      if (!p) return;
+      var modal = document.getElementById('productDetailModal');
+      var discount = Math.round(((p.mrp - p.price) / p.mrp) * 100);
+      var mainImg = /** @type {HTMLImageElement} */ (document.getElementById('detailModalMainImg'));
+      if (mainImg) mainImg.src = p.image;
+
+      document.getElementById('detailModalTitle').innerText = p.name;
+      document.getElementById('detailModalCategory').innerText = p.category;
+      document.getElementById('detailModalPrice').innerText = '₹' + p.price;
+      document.getElementById('detailModalMrp').innerText = '₹' + p.mrp;
+      document.getElementById('detailModalSaveText').innerText = 'Save ₹' + (p.mrp - p.price) + ' (' + discount + '% OFF)';
+      document.getElementById('detailModalDiscountBadge').innerText = discount + '% OFF';
+      document.getElementById('detailModalTag').innerText = p.badge;
+      document.getElementById('detailModalRating').innerText = String(p.rating);
+
+      var thumbTrack = document.getElementById('detailThumbnailsTrack');
+      var countBadge = document.getElementById('photoCountBadge');
+      var imgs = (p.images && p.images.length > 0) ? p.images : [p.image];
+      if (countBadge) countBadge.innerText = String(imgs.length);
+
+      if (thumbTrack) {
+        var tHtml = '';
+        for (var idx = 0; idx < imgs.length; idx++) {
+          var imgUrl = imgs[idx];
+          tHtml += '<div onclick="window.switchModalImage(\'' + imgUrl + '\', this)" class="modal-thumb min-w-[56px] w-14 h-14 rounded-lg overflow-hidden border-2 cursor-pointer shrink-0 ' + (idx === 0 ? 'border-[#9c1261]' : 'border-slate-200') + '">' +
+            '<img src="' + imgUrl + '" class="w-full h-full object-cover" /></div>';
+        }
+        thumbTrack.innerHTML = tHtml;
+      }
+
+      document.getElementById('detailModalWaBtn').onclick = function() { window.orderItemOnWhatsAppById(p.id); };
+      document.getElementById('detailModalCartBtn').onclick = function() {
+        window.addToCart(p.id);
+        window.closeProductDetailModal();
+      };
+
+      var revContainer = document.getElementById('detailModalReviewsList');
+      if (revContainer) {
+        var rHtml = '';
+        for (var j = 0; j < p.reviews.length; j++) {
+          var r = p.reviews[j];
+          rHtml += '<div class="bg-slate-50 border border-slate-200/80 rounded-lg p-2.5 text-[11px]">' +
+            '<div class="flex items-center justify-between"><span class="font-bold text-slate-800">' + r.name + '</span>' +
+            '<span class="text-amber-500 text-[10px]">★★★★★</span></div>' +
+            '<p class="text-slate-600 mt-1 leading-relaxed text-[10px]">' + r.comment + '</p></div>';
+        }
+        revContainer.innerHTML = rHtml;
+      }
+      modal?.classList.remove('hidden');
+    };
+
+    /**
+     * @param {string} url
+     * @param {HTMLElement} thumbEl
+     */
+    window.switchModalImage = function(url, thumbEl) {
+      var mainImg = /** @type {HTMLImageElement} */ (document.getElementById('detailModalMainImg'));
+      if (mainImg) mainImg.src = url;
+      var allThumbs = document.querySelectorAll('.modal-thumb');
+      allThumbs.forEach(function(el) {
+        el.className = "modal-thumb min-w-[56px] w-14 h-14 rounded-lg overflow-hidden border-2 cursor-pointer shrink-0 border-slate-200";
+      });
+      if (thumbEl) thumbEl.className = "modal-thumb min-w-[56px] w-14 h-14 rounded-lg overflow-hidden border-2 cursor-pointer shrink-0 border-[#9c1261]";
+    };
+
+    window.closeProductDetailModal = function() {
+      document.getElementById('productDetailModal')?.classList.add('hidden');
+    };
+
+    window.handleSecretTap = function() {
+      secretTapCount++;
+      clearTimeout(secretTapTimer);
+      if (secretTapCount >= 3) {
+        secretTapCount = 0;
+        var pinInp = /** @type {HTMLInputElement} */ (document.getElementById('adminSecretPinInput'));
+        if (pinInp) pinInp.value = '';
+        document.getElementById('adminPinModal')?.classList.remove('hidden');
+      } else {
+        secretTapTimer = setTimeout(function() { secretTapCount = 0; }, 1200);
+      }
+    };
+
+    window.closeAdminPinModal = function() {
+      document.getElementById('adminPinModal')?.classList.add('hidden');
+    };
+
+    window.verifyAdminSession = function() {
+      var pinInp = /** @type {HTMLInputElement} */ (document.getElementById('adminSecretPinInput'));
+      var pin = pinInp ? pinInp.value : '';
+      if (pin === "9060") {
+        sessionStorage.setItem('mithilamart_admin_auth', 'valid');
+        window.closeAdminPinModal();
+        window.switchTab('admin');
+        renderAdminDashboard();
+      } else {
+        alert('Access Denied: Invalid credentials.');
+      }
+    };
+
+    window.logoutAdmin = function() {
+      sessionStorage.removeItem('mithilamart_admin_auth');
+      window.switchTab('home');
+    };
+
+    function renderAdminDashboard() {
+      if (sessionStorage.getItem('mithilamart_admin_auth') !== 'valid') {
+        window.switchTab('home');
+        return;
+      }
+      var countEl = document.getElementById('adminProdCount');
+      if (countEl) countEl.innerText = String(PRODUCTS.length);
+      var list = document.getElementById('adminProductList');
+      if (!list) return;
+      var html = '';
+      for (var i = 0; i < PRODUCTS.length; i++) {
+        var p = PRODUCTS[i];
+        html += '<div class="py-2.5 flex items-center justify-between gap-2">' +
+          '<div class="flex items-center gap-2"><img src="' + p.image + '" class="w-10 h-10 object-cover rounded" />' +
+          '<div><p class="font-bold text-slate-900 line-clamp-1">' + p.name + '</p><span class="text-slate-500 text-[10px]">' + p.category + '</span></div></div>' +
+          '<div class="flex items-center gap-2"><span class="font-extrabold text-[#9c1261]">₹' + p.price + '</span>' +
+          '<button onclick="window.deleteProduct(\'' + p.id + '\')" class="text-red-500 hover:text-red-700 p-1"><i class="fa-solid fa-trash"></i></button></div></div>';
+      }
+      list.innerHTML = html;
+    }
+
+    /**
+     * @param {string} id
+     */
+    window.deleteProduct = function(id) {
+      if (confirm('Remove item from local product cache?')) {
+        for (var i = 0; i < PRODUCTS.length; i++) {
+          if (PRODUCTS[i].id === id) { PRODUCTS.splice(i, 1); break; }
+        }
+        renderTrendingSlider();
+        renderProducts();
+        renderAdminDashboard();
+      }
+    };
+
+    window.openPincodeModal = function() {
+      document.getElementById('pincodeModal')?.classList.remove('hidden');
+    };
+    window.closePincodeModal = function() {
+      document.getElementById('pincodeModal')?.classList.add('hidden');
+    };
+
+    /**
+     * @param {string} pin
+     * @param {string} area
+     */
+    window.selectPincode = function(pin, area) {
+      APP_CONFIG.selectedPincode = pin;
+      APP_CONFIG.selectedArea = area;
+      document.getElementById('headerPincodeBadge').innerText = area + ' ' + pin;
+      var custPin = /** @type {HTMLInputElement} */ (document.getElementById('custPincode'));
+      if (custPin) custPin.value = area + ' - ' + pin;
+      window.closePincodeModal();
+    };
+
+    /**
+     * @param {string} tabId
+     */
+    window.switchTab = function(tabId) {
+      var tabs = ['homeTab', 'cartTab', 'wishlistTab', 'trackTab', 'adminTab'];
+      for (var i = 0; i < tabs.length; i++) document.getElementById(tabs[i])?.classList.add('hidden');
+      var navs = ['navHome', 'navWishlist', 'navCart', 'navTrack'];
+      for (var j = 0; j < navs.length; j++) document.getElementById(navs[j])?.classList.replace('text-[#9c1261]', 'text-slate-500');
+
+      if (tabId === 'home') {
+        document.getElementById('homeTab')?.classList.remove('hidden');
+        document.getElementById('navHome')?.classList.replace('text-slate-500', 'text-[#9c1261]');
+      } else if (tabId === 'cart') {
+        document.getElementById('cartTab')?.classList.remove('hidden');
+        document.getElementById('navCart')?.classList.replace('text-slate-500', 'text-[#9c1261]');
+        renderCart();
+      } else if (tabId === 'wishlist') {
+        document.getElementById('wishlistTab')?.classList.remove('hidden');
+        document.getElementById('navWishlist')?.classList.replace('text-slate-500', 'text-[#9c1261]');
+        renderWishlist();
+      } else if (tabId === 'track') {
+        document.getElementById('trackTab')?.classList.remove('hidden');
+        document.getElementById('navTrack')?.classList.replace('text-slate-500', 'text-[#9c1261]');
+        renderMyRecentOrders();
+      } else if (tabId === 'admin') {
+        document.getElementById('adminTab')?.classList.remove('hidden');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    /**
+     * @param {string} cat
+     */
+    window.setCategory = function(cat) {
+      selectedCategory = cat;
+      var buttons = document.querySelectorAll('.cat-pill');
+      buttons.forEach(function(btn) {
+        var b = /** @type {HTMLElement} */ (btn);
+        var match = (cat === 'All' && b.innerText === 'All') || b.innerText.indexOf(cat) !== -1;
+        b.className = match ? 
+          "cat-pill px-3 py-1 rounded-full whitespace-nowrap bg-[#9c1261] text-white border border-[#9c1261]" :
+          "cat-pill px-3 py-1 rounded-full whitespace-nowrap bg-white text-slate-700 border border-slate-200";
+      });
+      var t = document.getElementById('currentCategoryTitle');
+      if (t) t.innerText = cat === 'All' ? 'All Products' : cat;
+      renderProducts();
+    };
+
+    /**
+     * @param {string} cat
+     */
+    window.setCategoryAndOpen = function(cat) {
+      window.switchTab('home');
+      window.setCategory(cat);
+    };
+
+    /**
+     * @param {string} val
+     */
+    window.handleSearch = function(val) {
+      document.getElementById('clearSearchBtn')?.classList.toggle('hidden', !val);
+      renderProducts();
+    };
+
+    window.clearSearch = function() {
+      var input = /** @type {HTMLInputElement} */ (document.getElementById('searchInput'));
+      if (input) input.value = '';
+      document.getElementById('clearSearchBtn')?.classList.add('hidden');
+      renderProducts();
+    };
+
+    window.addEventListener('DOMContentLoaded', function() {
+      initLocalStorageData();
+      startFlashSaleTimer();
+      updateCartBadge();
+      renderCart();
+      renderMyRecentOrders();
+      loadProductsFromGoogleSheet();
+      loadSavedUserProfile();
+
+      document.getElementById('addressFormElement')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var nInp = /** @type {HTMLInputElement} */ (document.getElementById('custName'));
+        var pInp = /** @type {HTMLInputElement} */ (document.getElementById('custPhone'));
+        var aInp = /** @type {HTMLTextAreaElement} */ (document.getElementById('custAddress'));
+        var lInp = /** @type {HTMLInputElement} */ (document.getElementById('custLandmark'));
+
+        if (!/^[6-9]\d{9}$/.test(pInp.value.trim())) {
+          alert('Please enter a valid 10-digit Indian mobile number.');
+          return;
+        }
+
+        customerInfo = {
+          name: nInp.value.trim(),
+          phone: pInp.value.trim(),
+          address: aInp.value.trim(),
+          pincode: APP_CONFIG.selectedPincode,
+          area: APP_CONFIG.selectedArea,
+          landmark: lInp.value.trim()
+        };
+        localStorage.setItem('mithilamart_user_profile', JSON.stringify(customerInfo));
+        updateLoginHeaderUI();
+
+        document.getElementById('addressStepView')?.classList.add('hidden');
+        document.getElementById('paymentStepView')?.classList.remove('hidden');
+        renderPaymentStep();
+      });
+
+      document.getElementById('newProductFormElement')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var nInp = /** @type {HTMLInputElement} */ (document.getElementById('newProdName'));
+        var cInp = /** @type {HTMLSelectElement} */ (document.getElementById('newProdCategory'));
+        var pInp = /** @type {HTMLInputElement} */ (document.getElementById('newProdPrice'));
+        var mInp = /** @type {HTMLInputElement} */ (document.getElementById('newProdMrp'));
+        var iInp = /** @type {HTMLInputElement} */ (document.getElementById('newProdImage'));
+        var bInp = /** @type {HTMLInputElement} */ (document.getElementById('newProdBadge'));
+
+        var rawImgs = (iInp ? iInp.value : '').split(',');
+        var cleanImgs = [];
+        for (var x = 0; x < rawImgs.length; x++) {
+          if (rawImgs[x].trim()) cleanImgs.push(rawImgs[x].trim());
+        }
+
+        var newProd = {
+          id: 'p-custom-' + Date.now(),
+          name: nInp.value.trim(),
+          category: cInp.value,
+          price: Math.max(1, Number(pInp.value)),
+          mrp: Math.max(Number(pInp.value), Number(mInp.value)),
+          images: cleanImgs,
+          image: cleanImgs[0] || '',
+          badge: bInp.value.trim() || 'Trending Item',
+          rating: 5.0,
+          reviewsCount: 1,
+          description: 'Catalog stock for Supaul festival shopping.',
+          reviews: [{ name: 'Store Team', rating: 5, comment: 'Stock verified.' }]
+        };
+
+        PRODUCTS.unshift(newProd);
+        renderTrendingSlider();
+        renderProducts();
+        renderAdminDashboard();
+        /** @type {HTMLFormElement} */ (e.target).reset();
+        alert('Product added to active browser session.');
+      });
+    });
+  </script>
+</body>
+</html>
